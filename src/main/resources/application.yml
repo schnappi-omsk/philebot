@@ -1,0 +1,12 @@
+xapi:
+  baseUrl: https://xapi.us/api
+  apiToken: ${API_TOKEN}
+tg:
+  baseUrl: https://api.telegram.org/bot
+  apiToken: ${TGAPI_TOKEN}
+  botName: Phil E-Bot
+ebot:
+  limitPerUser: 5
+redis:
+  host: ${REDIS_HOST}
+  port: ${REDIS_PORT}

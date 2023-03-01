@@ -1,0 +1,15 @@
+spring:
+  main:
+    allow-bean-definition-overriding: true
+xapi:
+  baseUrl: https://localhost
+  apiToken: 123456
+tg:
+  baseUrl: https://localhost
+  apiToken: 123456
+  botName: Phil E-Bot
+ebot:
+  limitPerUser: 5
+redis:
+  host: localhost
+  port: 6379
