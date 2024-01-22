@@ -55,7 +55,7 @@ public class XboxUserActivityService {
     public Activity playerActivity(final Profile profile) {
         Objects.requireNonNull(profile);
 
-        return  playerActivity(profile.getGamertag());
+        return playerActivity(profile.getGamertag());
     }
 
     public Activity playerActivity(final String gamertag) {

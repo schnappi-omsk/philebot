@@ -1,6 +1,6 @@
 xapi:
   baseUrl: https://xapi.us/api
-  apiToken: ${API_TOKEN}
+  apiToken: Bearer ${API_TOKEN}
 tg:
   baseUrl: https://api.telegram.org/bot
   apiToken: ${TGAPI_TOKEN}
