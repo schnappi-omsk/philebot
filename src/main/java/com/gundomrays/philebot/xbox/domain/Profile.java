@@ -20,6 +20,10 @@ public class Profile {
     @Indexed
     private String gamertag;
 
+    @NonNull
+    @Indexed
+    private String tgUsername;
+
     private LocalDateTime lastAchievement = LocalDateTime.MIN;
 
 }

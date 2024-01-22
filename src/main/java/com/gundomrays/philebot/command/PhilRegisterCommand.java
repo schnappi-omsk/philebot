@@ -18,9 +18,9 @@ public class PhilRegisterCommand implements PhilCommand {
     }
 
     @Override
-    public String execute(String gamertag) {
+    public String execute(String caller, String gamertag) {
         log.info("Registration request was received for gamertag = {}", gamertag);
-        XboxServiceResponse result = registrationService.registerUser(gamertag);
+        XboxServiceResponse result = registrationService.registerUser(caller, gamertag);
         return result.getText();
     }
 
