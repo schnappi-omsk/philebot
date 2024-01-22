@@ -6,7 +6,12 @@ plugins {
 
 group = 'com.gundomrays'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '19'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(20)
+    }
+}
 
 configurations {
     compileOnly {
