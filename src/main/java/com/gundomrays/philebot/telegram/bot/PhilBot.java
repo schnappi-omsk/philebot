@@ -4,7 +4,6 @@ import com.gundomrays.philebot.command.CommandRequest;
 import com.gundomrays.philebot.command.PhilCommand;
 import com.gundomrays.philebot.command.SystemCommandTypes;
 import com.gundomrays.philebot.telegram.exception.TelegramException;
-import com.gundomrays.philebot.xbox.xapi.XboxAchievementRetrieveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,11 +53,11 @@ public class PhilBot extends TelegramLongPollingBot {
         log.info("Message from: {}, text: {}, in the chat: {}", from.getUserName(), messageText, message.getChatId());
 
         if (message.isCommand()) {
-            CommandRequest request = parseCommand(messageText);
+            CommandRequest request = parseCommand(message);
             log.info("Command {} was received", request.getCommand());
             PhilCommand command = commands.get(request.getCommand());
             if (command != null) {
-                final String result = command.execute(from.getUserName(), request.getArgument());
+                final String result = command.execute(request);
                 reply(message.getChatId(), message.getMessageId(), result);
             } else {
                 log.info("Command not found: {}", messageText);
@@ -73,7 +72,7 @@ public class PhilBot extends TelegramLongPollingBot {
     @Scheduled(fixedDelay = 5L, timeUnit = TimeUnit.MINUTES)
     public void retrieveAndSendAchievements() {
         final PhilCommand command = commands.get(SystemCommandTypes.XBOX_ACHIEVEMENTS);
-        final String result = command.execute(systemCaller, systemArg);
+        final String result = command.execute(systemRequest(0L));
 
     }
 
@@ -102,14 +101,26 @@ public class PhilBot extends TelegramLongPollingBot {
     }
 
 
-    private CommandRequest parseCommand(String msg) {
+    private CommandRequest parseCommand(Message msg) {
         final CommandRequest request = new CommandRequest();
-        int spaceIndex = msg.indexOf(" ");
-        final String command = spaceIndex > -1 ? msg.substring(0, spaceIndex) : msg;
+        request.setChatId(msg.getChatId());
+        request.setCaller(msg.getFrom().getUserName());
+
+        final String messageText = msg.getText();
+        int spaceIndex = messageText.indexOf(" ");
+        final String command = spaceIndex > -1 ? messageText.substring(0, spaceIndex) : messageText;
         request.setCommand(command);
         if (spaceIndex > -1) {
-            request.setArgument(msg.substring(spaceIndex).trim());
+            request.setArgument(messageText.substring(spaceIndex).trim());
         }
+        return request;
+    }
+
+    private CommandRequest systemRequest(final Long chatId) {
+        final CommandRequest request = new CommandRequest();
+        request.setCaller(systemCaller);
+        request.setArgument(systemArg);
+        request.setChatId(chatId);
         return request;
     }
 
