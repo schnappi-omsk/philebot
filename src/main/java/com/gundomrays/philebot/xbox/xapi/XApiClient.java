@@ -1,7 +1,6 @@
 package com.gundomrays.philebot.xbox.xapi;
 
 import com.gundomrays.philebot.xbox.domain.Activity;
-import com.gundomrays.philebot.xbox.domain.PagedData;
 import com.gundomrays.philebot.xbox.domain.Profile;
 import com.gundomrays.philebot.xbox.domain.TitleHistory;
 import org.slf4j.Logger;
@@ -63,31 +62,6 @@ public class XApiClient {
         }
 
         throw new RuntimeException("No activity found for xuid: " + xuid);
-    }
-
-    public String usersScreenshots(final String xuid) {
-        PagedData screenshots = webClient.get()
-                .uri(uriBuilder -> uriBuilder.path("/{xuid}/new-screenshots").build(xuid))
-                .retrieve()
-                .bodyToMono(PagedData.class)
-                .block();
-
-        String continuationToken = screenshots.getContinuationToken();
-        while (!continuationToken.isEmpty()) {
-            log.info("Found screenshots for xuid={}", xuid);
-            screenshots = webClient.get()
-                    .uri(uriBuilder -> uriBuilder.path("/{xuid}/new-screenshots").build(xuid))
-                    .header("Continuation-Token", continuationToken)
-                    .retrieve()
-                    .bodyToMono(PagedData.class)
-                    .block();
-
-            System.out.println(screenshots.getValues().length);
-
-            continuationToken = screenshots.getContinuationToken();
-        }
-
-        return "Screenshots found!";
     }
 
 }
