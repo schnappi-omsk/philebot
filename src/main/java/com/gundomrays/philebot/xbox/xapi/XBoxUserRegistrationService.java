@@ -48,6 +48,10 @@ public class XBoxUserRegistrationService {
         }
     }
 
+    public Profile retrieveUserProfile(final String xuid) {
+        return xboxProfileRepository.findById(xuid).orElse(null);
+    }
+
     public boolean checkUserRegistration(final String tgUsername) {
         Objects.requireNonNull(tgUsername);
 

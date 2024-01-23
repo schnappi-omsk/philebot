@@ -4,6 +4,7 @@ xapi:
 tg:
   baseUrl: https://api.telegram.org/bot
   apiToken: ${TGAPI_TOKEN}
+  chatId: -4126602192
   botName: Phil E-Bot
   systemCaller: Phil Spencer
   systemArg: Power your dreams
@@ -12,3 +13,6 @@ ebot:
 redis:
   host: ${REDIS_HOST}
   port: ${REDIS_PORT}
+server:
+  servlet:
+    context-path: /
