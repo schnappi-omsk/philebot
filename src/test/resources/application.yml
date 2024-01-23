@@ -8,6 +8,8 @@ tg:
   baseUrl: https://localhost
   apiToken: 123456
   botName: Phil E-Bot
+  systemCaller: Phil Spencer
+  systemArg: Power your dreams
 ebot:
   limitPerUser: 5
 redis:

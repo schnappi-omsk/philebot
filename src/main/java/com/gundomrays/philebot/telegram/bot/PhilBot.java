@@ -2,13 +2,17 @@ package com.gundomrays.philebot.telegram.bot;
 
 import com.gundomrays.philebot.command.CommandRequest;
 import com.gundomrays.philebot.command.PhilCommand;
+import com.gundomrays.philebot.command.SystemCommandTypes;
 import com.gundomrays.philebot.telegram.exception.TelegramException;
+import com.gundomrays.philebot.xbox.xapi.XboxAchievementRetrieveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -17,14 +21,22 @@ import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @EnableAsync
+@EnableScheduling
 public class PhilBot extends TelegramLongPollingBot {
 
     private static final Logger log = LoggerFactory.getLogger(PhilBot.class);
 
     @Value("${tg.botName}")
     private String botName;
+
+    @Value("${tg.systemCaller}")
+    private String systemCaller;
+
+    @Value("${tg.systemArg}")
+    private String systemArg;
 
     @Autowired
     private Map<String, PhilCommand> commands;
@@ -39,7 +51,7 @@ public class PhilBot extends TelegramLongPollingBot {
         Message message = update.getMessage();
         User from = message.getFrom();
         String messageText = message.getText();
-        log.info("Message from: {}, text: {}", from.getUserName(), messageText);
+        log.info("Message from: {}, text: {}, in the chat: {}", from.getUserName(), messageText, message.getChatId());
 
         if (message.isCommand()) {
             CommandRequest request = parseCommand(messageText);
@@ -47,19 +59,27 @@ public class PhilBot extends TelegramLongPollingBot {
             PhilCommand command = commands.get(request.getCommand());
             if (command != null) {
                 final String result = command.execute(from.getUserName(), request.getArgument());
-                reply(from.getId(), message.getMessageId(), result);
+                reply(message.getChatId(), message.getMessageId(), result);
             } else {
                 log.info("Command not found: {}", messageText);
-                reply(from.getId(), message.getMessageId(), "Command not found: " + messageText);
+                reply(message.getChatId(), message.getMessageId(), "Command not found: " + messageText);
             }
         } else {
-            reply(from.getId(), message.getMessageId(), "Test!");
+            reply(message.getChatId(), message.getMessageId(), systemArg);
         }
     }
 
-    public void reply(Long idTo, Integer msgId, String text) {
+    @Async
+    @Scheduled(fixedDelay = 5L, timeUnit = TimeUnit.MINUTES)
+    public void retrieveAndSendAchievements() {
+        final PhilCommand command = commands.get(SystemCommandTypes.XBOX_ACHIEVEMENTS);
+        final String result = command.execute(systemCaller, systemArg);
+
+    }
+
+    public void reply(Long chatId, Integer msgId, String text) {
         final SendMessage sender = SendMessage.builder()
-                .chatId(idTo)
+                .chatId(chatId)
                 .replyToMessageId(msgId)
                 .text(text)
                 .build();
@@ -69,9 +89,9 @@ public class PhilBot extends TelegramLongPollingBot {
             throw new TelegramException(e.getMessage(), e);
         }
     }
-    public void sendMessage(Long idTo, String text) {
+    public void sendMessage(Long chatId, String text) {
         final SendMessage sender = SendMessage.builder()
-                .chatId(idTo)
+                .chatId(chatId)
                 .text(text)
                 .build();
         try {
