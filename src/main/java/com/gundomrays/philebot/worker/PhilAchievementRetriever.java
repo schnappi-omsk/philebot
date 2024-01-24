@@ -76,7 +76,7 @@ public class PhilAchievementRetriever {
     }
 
     private String makePingUrl(final String username) {
-        return String.format("tg://user?id=%s", "@" + username);
+        return String.format("tg://user?id=%s", username);
     }
 
     private String wrapLink(final String url, final String text) {
