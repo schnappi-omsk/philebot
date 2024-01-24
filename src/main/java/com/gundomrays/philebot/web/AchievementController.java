@@ -7,12 +7,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+
 @Controller
 @RequestMapping("/")
 public class AchievementController {
-    @RequestMapping(value = "/xbox/{username}/{game}/{achievement}/{description}/{pts}/{rarity}", method = RequestMethod.GET)
+    @RequestMapping(value = "/xbox/{game}/{achievement}/{description}/{pts}/{rarity}", method = RequestMethod.GET)
     public String achievementPage(
-            @PathVariable("username") String username,
             @PathVariable("game") String game,
             @PathVariable("achievement") String achievement,
             @PathVariable("description") String description,
@@ -21,11 +23,10 @@ public class AchievementController {
             @RequestParam("imgUrl") String imgUrl,
             Model model
     ) {
-        final String achievementInfo = String.format("%s -%s (%d pts., %d%%)", achievement, description, score, rarity);
+        final String achievementInfo = String.format("%s - %s (%d pts., %d%%)", achievement, description, score, rarity);
 
-        model.addAttribute("username", username);
-        model.addAttribute("game", game);
-        model.addAttribute("achievement", achievementInfo);
+        model.addAttribute("game", URLDecoder.decode(game, StandardCharsets.UTF_8));
+        model.addAttribute("achievement", URLDecoder.decode(achievementInfo, StandardCharsets.UTF_8));
         model.addAttribute("imgUrl", imgUrl);
 
         return "achievement";

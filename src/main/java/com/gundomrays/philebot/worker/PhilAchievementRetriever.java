@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -49,21 +51,29 @@ public class PhilAchievementRetriever {
     }
 
     private String achievementText(final String username, final ActivityItem item) {
-        log.info(achievementUrl(username, item));
-        return "<a href=\"" + achievementUrl(username, item) + "\"> </a>";
+        String text = wrapLink(makePingUrl(username), username) + " - " + wrapLink(achievementUrl(item), item.getContentTitle());
+        log.info(text);
+        return text;
     }
 
-    private String achievementUrl(final String username, final ActivityItem item) {
+    private String achievementUrl(final ActivityItem item) {
         return String.format(
-                "http://localhost:8080/xbox/%s/%s/%s/%s/%d/%d?imgUrl=%s",
-                username,
-                item.getContentTitle(),
-                item.getAchievementName(),
-                item.getAchievementDescription(),
+                "http://localhost:8080/xbox/%s/%s/%s/%d/%d?imgUrl=%s",
+                URLEncoder.encode(item.getContentTitle(), StandardCharsets.UTF_8),
+                URLEncoder.encode(item.getAchievementName(), StandardCharsets.UTF_8),
+                URLEncoder.encode(item.getAchievementDescription(), StandardCharsets.UTF_8),
                 item.getGamerscore(),
                 item.getRarityPercentage(),
                 item.getAchievementIcon()
         );
+    }
+
+    private String makePingUrl(final String username) {
+        return String.format("tg://user?id=%s", "@" + username);
+    }
+
+    private String wrapLink(final String url, final String text) {
+        return String.format("<a href='%s'>%s</a>", url, text);
     }
 
 }
