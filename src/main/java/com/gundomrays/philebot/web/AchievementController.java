@@ -22,13 +22,11 @@ public class AchievementController {
             @RequestParam("imgUrl") String imgUrl,
             Model model
     ) {
-        final String achievementInfo = String.format("%s (%d pts., %d%%)",
-                URLDecoder.decode(description, StandardCharsets.UTF_8),
-                score,
-                rarity);
+        final String achievementStats = String.format("%d pts., %d%%", score, rarity);
 
-        model.addAttribute("achievement", achievement);
-        model.addAttribute("achievementInfo", achievementInfo);
+        model.addAttribute("achievement", URLDecoder.decode(achievement, StandardCharsets.UTF_8));
+        model.addAttribute("achievementInfo", URLDecoder.decode(description, StandardCharsets.UTF_8));
+        model.addAttribute("achievementStats", achievementStats);
         model.addAttribute("imgUrl", URLDecoder.decode(imgUrl, StandardCharsets.UTF_8));
 
         return "achievement";
