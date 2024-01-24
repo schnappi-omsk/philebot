@@ -64,9 +64,8 @@ public class PhilAchievementRetriever {
 
     private String achievementUrl(final ActivityItem item) {
         return String.format(
-                "%s/xbox/%s/%s/%s/%d/%d?imgUrl=%s",
+                "%s/xbox/%s/%s/%d/%d?imgUrl=%s",
                 serviceHost,
-                URLEncoder.encode(item.getContentTitle(), StandardCharsets.UTF_8),
                 URLEncoder.encode(item.getAchievementName(), StandardCharsets.UTF_8),
                 URLEncoder.encode(item.getAchievementDescription(), StandardCharsets.UTF_8),
                 item.getGamerscore(),

@@ -13,9 +13,8 @@ import java.nio.charset.StandardCharsets;
 @Controller
 @RequestMapping("/")
 public class AchievementController {
-    @RequestMapping(value = "/xbox/{game}/{achievement}/{description}/{pts}/{rarity}", method = RequestMethod.GET)
+    @RequestMapping(value = "/xbox/{achievement}/{description}/{pts}/{rarity}", method = RequestMethod.GET)
     public String achievementPage(
-            @PathVariable("game") String game,
             @PathVariable("achievement") String achievement,
             @PathVariable("description") String description,
             @PathVariable("pts") Integer score,
@@ -28,7 +27,6 @@ public class AchievementController {
                 score,
                 rarity);
 
-        model.addAttribute("game", URLDecoder.decode(game, StandardCharsets.UTF_8));
         model.addAttribute("achievement", achievement);
         model.addAttribute("achievementInfo", achievementInfo);
         model.addAttribute("imgUrl", URLDecoder.decode(imgUrl, StandardCharsets.UTF_8));
