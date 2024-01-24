@@ -20,6 +20,9 @@ public class PhilAchievementRetriever {
     @Value("${ebot.serviceHost}")
     private String serviceHost;
 
+    @Value("${server.port}")
+    private Integer servicePort;
+
     private static final Logger log = LoggerFactory.getLogger(PhilAchievementRetriever.class);
 
     private final XboxAchievementRetrieveService xboxAchievementRetrieveService;
@@ -62,8 +65,9 @@ public class PhilAchievementRetriever {
 
     private String achievementUrl(final ActivityItem item) {
         return String.format(
-                "%s/xbox/%s/%s/%s/%d/%d?imgUrl=%s",
+                "%s:%d/xbox/%s/%s/%s/%d/%d?imgUrl=%s",
                 serviceHost,
+                servicePort,
                 URLEncoder.encode(item.getContentTitle(), StandardCharsets.UTF_8),
                 URLEncoder.encode(item.getAchievementName(), StandardCharsets.UTF_8),
                 URLEncoder.encode(item.getAchievementDescription(), StandardCharsets.UTF_8),
