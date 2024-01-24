@@ -16,6 +16,8 @@ ebot:
 redis:
   host: localhost
   port: 6379
+  user:
+  pass:
 server:
   servlet:
     context-path: /

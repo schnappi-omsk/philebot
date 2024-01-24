@@ -13,6 +13,8 @@ ebot:
 redis:
   host: ${REDIS_HOST}
   port: ${REDIS_PORT}
+  user: ${REDIS_USER}
+  pass: ${REDIS_PASS}
 server:
   servlet:
     context-path: /

@@ -17,11 +17,23 @@ public class RedisConfig {
     @Value("${redis.port}")
     private Integer redisPort;
 
+    @Value("${redis.user}")
+    private String redisUsername;
+
+    @Value("${redis.pass}")
+    private String redisPassword;
+
     @Bean
     RedisStandaloneConfiguration redisConfiguration() {
         RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
         configuration.setHostName(redisHost);
         configuration.setPort(redisPort);
+        if ((redisUsername != null && !redisUsername.isEmpty())
+                && (redisPassword != null && !redisPassword.isEmpty())
+        ) {
+            configuration.setUsername(redisUsername);
+            configuration.setPassword(redisPassword);
+        }
         return configuration;
     }
 
