@@ -24,6 +24,10 @@ public class Profile {
     @Indexed
     private String tgUsername;
 
+    @NonNull
+    @Indexed
+    private Long tgId;
+
     private LocalDateTime lastAchievement = LocalDateTime.MIN;
 
 }

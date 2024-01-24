@@ -4,6 +4,7 @@ import com.gundomrays.philebot.xbox.domain.ActivityItem;
 import com.gundomrays.philebot.xbox.domain.Profile;
 import com.gundomrays.philebot.xbox.xapi.XBoxUserRegistrationService;
 import com.gundomrays.philebot.xbox.xapi.XboxAchievementRetrieveService;
+import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,15 +48,15 @@ public class PhilAchievementRetriever {
 
             List<ActivityItem> achievements = achievementsByXuid.get(xuid);
             result.addAll(achievements.stream()
-                            .map(ach -> achievementText(gamer.getTgUsername(), ach))
+                            .map(ach -> achievementText(gamer.getTgUsername(), gamer.getTgId(), ach))
                             .collect(Collectors.toSet()));
         }
 
         return result;
     }
 
-    private String achievementText(final String username, final ActivityItem item) {
-        String text = wrapLink(makePingUrl(username), "@" + username)
+    private String achievementText(final String username, Long tgId, final ActivityItem item) {
+        String text = wrapLink(makePingUrl(String.valueOf(tgId)), "@" + username)
                 + " - " + wrapLink(achievementUrl(item), item.getContentTitle());
         log.info(text);
         return text;

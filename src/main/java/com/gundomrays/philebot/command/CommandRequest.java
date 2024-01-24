@@ -8,6 +8,7 @@ import lombok.Setter;
 public class CommandRequest {
 
     private String caller;
+    private Long callerId;
     private Long chatId;
     private String command;
     private String argument;

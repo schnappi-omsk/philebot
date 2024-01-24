@@ -29,7 +29,7 @@ public class XBoxUserRegistrationService {
         this.xboxTitleHistoryRepository = xboxTitleHistoryRepository;
     }
 
-    public XboxServiceResponse registerUser(final String tgUserName, final String gamerTag) {
+    public XboxServiceResponse registerUser(final String tgUserName, final Long tgId, final String gamerTag) {
         Objects.requireNonNull(tgUserName);
         Objects.requireNonNull(gamerTag);
 
@@ -42,6 +42,7 @@ public class XBoxUserRegistrationService {
             log.info("Registration user with Telegram username {}", tgUserName);
             final Profile xboxProfile = xApiClient.userByGamertag(gamerTag);
             xboxProfile.setTgUsername(tgUserName);
+            xboxProfile.setTgId(tgId);
             fillProfileHistory(xboxProfile);
             xboxProfileRepository.save(xboxProfile);
             return new XboxServiceResponse(String.format("%s was successfully registered with gamertag %s", tgUserName, gamerTag));

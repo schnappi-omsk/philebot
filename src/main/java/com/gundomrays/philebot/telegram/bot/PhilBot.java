@@ -117,6 +117,7 @@ public class PhilBot extends TelegramLongPollingBot {
         final CommandRequest request = new CommandRequest();
         request.setChatId(msg.getChatId());
         request.setCaller(msg.getFrom().getUserName());
+        request.setCallerId(msg.getFrom().getId());
 
         final String messageText = msg.getText();
         int spaceIndex = messageText.indexOf(" ");
