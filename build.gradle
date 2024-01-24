@@ -38,14 +38,13 @@ dependencies {
     testImplementation 'io.projectreactor:reactor-test'
 }
 
+jar {
+    enabled = false
+}
 
 bootJar {
     mainClass = 'com.gundomrays.philebot.PhilEbotApplication'
     archiveFileName = "${project.name}.jar"
-
-    doLast {
-        delete fileTree(dir: 'build/libs', include: '*-plain.jar')
-    }
 }
 
 tasks.named('test') {
