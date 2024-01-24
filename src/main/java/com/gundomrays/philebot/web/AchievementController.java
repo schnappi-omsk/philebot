@@ -23,7 +23,7 @@ public class AchievementController {
             @RequestParam("imgUrl") String imgUrl,
             Model model
     ) {
-        final String achievementInfo = String.format("%s - %s %n (%d pts., %d%%)",
+        final String achievementInfo = String.format("%s - %s (%d pts., %d%%)",
                 URLDecoder.decode(achievement, StandardCharsets.UTF_8),
                 URLDecoder.decode(description, StandardCharsets.UTF_8),
                 score,
