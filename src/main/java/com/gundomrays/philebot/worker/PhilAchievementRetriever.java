@@ -4,7 +4,6 @@ import com.gundomrays.philebot.xbox.domain.ActivityItem;
 import com.gundomrays.philebot.xbox.domain.Profile;
 import com.gundomrays.philebot.xbox.xapi.XBoxUserRegistrationService;
 import com.gundomrays.philebot.xbox.xapi.XboxAchievementRetrieveService;
-import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -64,13 +63,14 @@ public class PhilAchievementRetriever {
 
     private String achievementUrl(final ActivityItem item) {
         return String.format(
-                "%s/xbox/%s/%s/%d/%d?imgUrl=%s",
+                "%s/xbox/%s/%s/%d/%d?imgUrl=%s?seed=%s",
                 serviceHost,
                 URLEncoder.encode(item.getAchievementName(), StandardCharsets.UTF_8),
                 URLEncoder.encode(item.getAchievementDescription(), StandardCharsets.UTF_8),
                 item.getGamerscore(),
                 item.getRarityPercentage(),
-                URLEncoder.encode(item.getAchievementIcon(), StandardCharsets.UTF_8)
+                URLEncoder.encode(item.getAchievementIcon(), StandardCharsets.UTF_8),
+                UUID.randomUUID()
         );
     }
 

@@ -20,6 +20,7 @@ public class AchievementController {
             @PathVariable("pts") Integer score,
             @PathVariable("rarity") Integer rarity,
             @RequestParam("imgUrl") String imgUrl,
+            @RequestParam("seed") String seed,
             Model model
     ) {
         final String achievementStats = String.format("%d pts., %d%%", score, rarity);
@@ -28,6 +29,7 @@ public class AchievementController {
         model.addAttribute("achievementInfo", URLDecoder.decode(description, StandardCharsets.UTF_8));
         model.addAttribute("achievementStats", achievementStats);
         model.addAttribute("imgUrl", URLDecoder.decode(imgUrl, StandardCharsets.UTF_8));
+        model.addAttribute("seed", seed);
 
         return "achievement";
     }
