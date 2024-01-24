@@ -6,6 +6,7 @@ import com.gundomrays.philebot.xbox.xapi.XBoxUserRegistrationService;
 import com.gundomrays.philebot.xbox.xapi.XboxAchievementRetrieveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.net.URLEncoder;
@@ -15,6 +16,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class PhilAchievementRetriever {
+
+    @Value("${ebot.serviceHost}")
+    private String serviceHost;
 
     private static final Logger log = LoggerFactory.getLogger(PhilAchievementRetriever.class);
 
@@ -58,7 +62,8 @@ public class PhilAchievementRetriever {
 
     private String achievementUrl(final ActivityItem item) {
         return String.format(
-                "http://localhost:8080/xbox/%s/%s/%s/%d/%d?imgUrl=%s",
+                "%s/xbox/%s/%s/%s/%d/%d?imgUrl=%s",
+                serviceHost,
                 URLEncoder.encode(item.getContentTitle(), StandardCharsets.UTF_8),
                 URLEncoder.encode(item.getAchievementName(), StandardCharsets.UTF_8),
                 URLEncoder.encode(item.getAchievementDescription(), StandardCharsets.UTF_8),

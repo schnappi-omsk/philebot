@@ -9,6 +9,7 @@ tg:
   systemCaller: Phil Spencer
   systemArg: Power your dreams
 ebot:
+  serviceHost: ${SERVICE_HOST}
   limitPerUser: 5
 redis:
   host: ${REDIS_HOST}
