@@ -31,7 +31,7 @@ public class AchievementController {
 
         model.addAttribute("game", URLDecoder.decode(game, StandardCharsets.UTF_8));
         model.addAttribute("achievement", achievementInfo);
-        model.addAttribute("imgUrl", imgUrl);
+        model.addAttribute("imgUrl", URLDecoder.decode(imgUrl, StandardCharsets.UTF_8));
 
         return "achievement";
     }
