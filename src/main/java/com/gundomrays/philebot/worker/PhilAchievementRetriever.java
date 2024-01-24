@@ -56,7 +56,7 @@ public class PhilAchievementRetriever {
 
     private String achievementText(final String username, Long tgId, final ActivityItem item) {
         String text = wrapLink(makePingUrl(String.valueOf(tgId)), "@" + username)
-                + " - " + wrapLink(achievementUrl(item), item.getContentTitle());
+                + " — " + wrapLink(achievementUrl(item), item.getContentTitle());
         log.info(text);
         return text;
     }
