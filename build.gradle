@@ -38,13 +38,12 @@ dependencies {
     testImplementation 'io.projectreactor:reactor-test'
 }
 
-jar {
-    manifest {
-        attributes(
-                'Main-Class': 'com.gundomrays.philebot.PhilEbotApplication'
-        )
-    }
+
+bootJar {
+    mainClass = 'com.gundomrays.philebot.PhilEbotApplication'
+    archiveFileName = "${project.name}.jar"
 }
+
 tasks.named('test') {
     useJUnitPlatform()
 }
