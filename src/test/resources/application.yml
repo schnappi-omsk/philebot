@@ -12,7 +12,7 @@ tg:
   systemCaller: Phil Spencer
   systemArg: Power your dreams
 ebot:
-  serviceHost: http://localhost
+  serviceHost: testHost
   limitPerUser: 5
 redis:
   host: localhost
