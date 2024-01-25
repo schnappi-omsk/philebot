@@ -19,3 +19,11 @@ redis:
 server:
   servlet:
     context-path: /
+spring:
+  datasource:
+    url: jdbc:postgresql://${PG_HOST}:${PG_PORT}/${PG_DB}
+    username: ${PG_USER}
+    password: ${PG_PASS}
+  flyway:
+    baseline-on-migrate: true
+    baseline-version: 1

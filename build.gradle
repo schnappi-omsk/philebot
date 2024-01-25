@@ -24,10 +24,19 @@ repositories {
 }
 
 dependencies {
+    //Data dependencies
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.postgresql:postgresql:42.2.5'
+
+    //Web dependencies
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+    //Telegram API
     implementation 'org.telegram:telegrambots:6.9.7.0'
 
     compileOnly 'org.projectlombok:lombok'

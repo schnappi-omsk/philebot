@@ -1,6 +1,13 @@
 spring:
   main:
     allow-bean-definition-overriding: true
+  datasource:
+    url: jdbc:postgresql://testHost:testPort/testDb
+    username: pgUser
+    password: pgPass
+  flyway:
+    baseline-on-migrate: false
+    baseline-version: 1
 xapi:
   baseUrl: https://localhost
   apiToken: 123456
