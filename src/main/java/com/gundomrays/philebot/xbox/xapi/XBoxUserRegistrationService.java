@@ -1,6 +1,7 @@
 package com.gundomrays.philebot.xbox.xapi;
 
 import com.gundomrays.philebot.data.XboxProfileRepository;
+import com.gundomrays.philebot.data.XboxTitleHistoryDataService;
 import com.gundomrays.philebot.data.XboxTitleHistoryRepository;
 import com.gundomrays.philebot.xbox.domain.Profile;
 import com.gundomrays.philebot.xbox.domain.TitleHistory;
@@ -19,14 +20,16 @@ public class XBoxUserRegistrationService {
     private final XApiClient xApiClient;
 
     private final XboxProfileRepository xboxProfileRepository;
-    private final XboxTitleHistoryRepository xboxTitleHistoryRepository;
+
+    private final XboxTitleHistoryDataService xboxTitleHistoryDataService;
+
 
     public XBoxUserRegistrationService(XApiClient xApiClient,
                                        XboxProfileRepository xboxProfileRepository,
-                                       XboxTitleHistoryRepository xboxTitleHistoryRepository) {
+                                       XboxTitleHistoryDataService xboxTitleHistoryDataService) {
         this.xApiClient = xApiClient;
         this.xboxProfileRepository = xboxProfileRepository;
-        this.xboxTitleHistoryRepository = xboxTitleHistoryRepository;
+        this.xboxTitleHistoryDataService = xboxTitleHistoryDataService;
     }
 
     public XboxServiceResponse registerUser(final String tgUserName, final Long tgId, final String gamerTag) {
@@ -62,9 +65,9 @@ public class XBoxUserRegistrationService {
     private void fillProfileHistory(final Profile profile) {
         Objects.requireNonNull(profile);
 
-        final TitleHistory titleHistory = xApiClient.titleHistory(profile.getId());
+        final TitleHistory titleHistory = xApiClient.titleHistory(profile.getXuid());
         log.info("User {} played {} titles", profile.getGamertag(), titleHistory.getTitles().size());
-        xboxTitleHistoryRepository.save(titleHistory);
+        xboxTitleHistoryDataService.saveTitleHistory(titleHistory);
         log.info("User {} title history was saved", profile.getGamertag());
     }
 

@@ -28,7 +28,7 @@ public class XboxGameStatsService {
 
         Map<String, String> result = new HashMap<>();
         for (Profile gamer : gamers) {
-            Iterable<TitleHistory> allByXuid = xboxTitleHistoryRepository.findAllByXuid(gamer.getId());
+            Iterable<TitleHistory> allByXuid = xboxTitleHistoryRepository.findAllByXuid(gamer.getXuid());
             for (TitleHistory history : allByXuid) {
                 for (Title title : history.getTitles()) {
                     result.put(title.getTitleId(), title.getName());

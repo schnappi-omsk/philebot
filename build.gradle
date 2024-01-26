@@ -25,11 +25,11 @@ repositories {
 
 dependencies {
     //Data dependencies
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+    implementation 'org.hibernate.validator:hibernate-validator:7.0.1.Final'
     implementation 'org.flywaydb:flyway-core'
-    implementation 'org.postgresql:postgresql:42.2.5'
+    implementation 'org.postgresql:postgresql:42.5.1'
 
     //Web dependencies
     implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -45,6 +45,7 @@ dependencies {
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'
+    testImplementation 'com.h2database:h2'
 }
 
 jar {

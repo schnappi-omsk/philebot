@@ -1,31 +1,28 @@
 package com.gundomrays.philebot.xbox.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
-import org.springframework.data.redis.core.RedisHash;
-import org.springframework.data.redis.core.index.Indexed;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@RedisHash("XboxProfile")
+@Entity
 public class Profile {
 
     @NonNull
-    @Indexed
-    private String id;
+    @Id
+    private String xuid;
 
-    @Indexed
     private String gamertag;
 
     @NonNull
-    @Indexed
     private String tgUsername;
 
     @NonNull
-    @Indexed
     private Long tgId;
 
     private LocalDateTime lastAchievement = LocalDateTime.MIN;

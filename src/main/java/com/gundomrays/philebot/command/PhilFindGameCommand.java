@@ -8,7 +8,7 @@ public class PhilFindGameCommand implements PhilCommand {
     @Override
     public String execute(CommandRequest request) {
 
-        return null;
+        return "To be implement, soon we can find game " + request.getArgument();
     }
 
 }

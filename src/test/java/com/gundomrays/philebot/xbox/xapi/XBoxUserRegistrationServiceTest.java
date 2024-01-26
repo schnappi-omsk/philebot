@@ -1,7 +1,7 @@
 package com.gundomrays.philebot.xbox.xapi;
 
 import com.gundomrays.philebot.data.XboxProfileRepository;
-import com.gundomrays.philebot.data.XboxTitleHistoryRepository;
+import com.gundomrays.philebot.data.XboxTitleHistoryDataService;
 import com.gundomrays.philebot.xbox.domain.Profile;
 import com.gundomrays.philebot.xbox.domain.TitleHistory;
 import org.junit.jupiter.api.AfterEach;
@@ -24,11 +24,11 @@ class XBoxUserRegistrationServiceTest {
     private XBoxUserRegistrationService xBoxUserRegistrationService;
     private XApiClient xApiClientMock = Mockito.mock(XApiClient.class);
     private XboxProfileRepository xboxProfileRepositoryMock = Mockito.mock(XboxProfileRepository.class);
-    private XboxTitleHistoryRepository xboxTitleHistoryRepositoryMock = Mockito.mock(XboxTitleHistoryRepository.class);
+    private XboxTitleHistoryDataService xboxTitleHistoryDataServiceMock = Mockito.mock(XboxTitleHistoryDataService.class);
 
     @BeforeEach
     void setUp() {
-        xBoxUserRegistrationService = new XBoxUserRegistrationService(xApiClientMock, xboxProfileRepositoryMock, xboxTitleHistoryRepositoryMock);
+        xBoxUserRegistrationService = new XBoxUserRegistrationService(xApiClientMock, xboxProfileRepositoryMock, xboxTitleHistoryDataServiceMock);
     }
 
     @AfterEach

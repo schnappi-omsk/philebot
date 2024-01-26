@@ -8,7 +8,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"com.gundomrays.philebot"})
 public class PhilEbotApplication {
     final TelegramBotsApi telegramBotsApi;
 

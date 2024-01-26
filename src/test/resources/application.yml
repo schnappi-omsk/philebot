@@ -1,8 +1,11 @@
 spring:
   main:
     allow-bean-definition-overriding: true
+  jpa:
+    hibernate:
+      ddl-auto: none
   datasource:
-    url: jdbc:postgresql://testHost:testPort/testDb
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
     username: pgUser
     password: pgPass
   flyway:
@@ -21,11 +24,6 @@ tg:
 ebot:
   serviceHost: testHost
   limitPerUser: 5
-redis:
-  host: localhost
-  port: 6379
-  user:
-  pass:
 server:
   servlet:
     context-path: /

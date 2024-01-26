@@ -52,24 +52,17 @@ public class XboxUserActivityService {
         return activities;
     }
 
-    public Activity playerActivity(final Profile profile) {
-        Objects.requireNonNull(profile);
+    public Activity playerActivity(final Profile xboxProfile) {
+        Objects.requireNonNull(xboxProfile);
 
-        return playerActivity(profile.getGamertag());
-    }
-
-    public Activity playerActivity(final String gamertag) {
-        final Profile xboxProfile = xboxProfileRepository.findByGamertag(gamertag)
-                .orElseThrow(() -> new RuntimeException("User is not registered in the app: " + gamertag));
-
-        final Activity playerActivity = xApiClient.userActivity(xboxProfile.getId());
+        final Activity playerActivity = xApiClient.userActivity(xboxProfile.getXuid());
         playerActivity.getActivityItems().stream()
                 .max(Comparator.naturalOrder())
                 .filter(item -> item.getDate().isAfter(xboxProfile.getLastAchievement()))
                 .ifPresent(item -> {
                     xboxProfile.setLastAchievement(item.getDate());
                     xboxProfileRepository.save(xboxProfile);
-                    log.info("User's {} last activity was updated", gamertag);
+                    log.info("User's {} last activity was updated", xboxProfile.getGamertag());
                 });
 
         return playerActivity;

@@ -1,21 +1,18 @@
 package com.gundomrays.philebot.xbox.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.redis.core.RedisHash;
-import org.springframework.data.redis.core.index.Indexed;
 
 @Getter
 @Setter
-@RedisHash("XboxTitle")
+@Entity
 public class Title {
 
-    @Indexed
+    @Id
     private String titleId;
 
-    @Indexed
     private String name;
-
-    private TitleProgress achievement;
 
 }
