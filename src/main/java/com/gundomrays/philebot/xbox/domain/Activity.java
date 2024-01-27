@@ -1,8 +1,6 @@
 package com.gundomrays.philebot.xbox.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,6 +13,7 @@ import java.util.TreeSet;
 public class Activity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer activityId;
 
     private String xuid;

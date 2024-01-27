@@ -55,7 +55,7 @@ public class XboxUserActivityService {
     public Activity playerActivity(final Profile xboxProfile) {
         Objects.requireNonNull(xboxProfile);
 
-        final Activity playerActivity = xApiClient.userActivity(xboxProfile.getXuid());
+        final Activity playerActivity = xApiClient.userActivity(xboxProfile.getId());
         playerActivity.getActivityItems().stream()
                 .max(Comparator.naturalOrder())
                 .filter(item -> item.getDate().isAfter(xboxProfile.getLastAchievement()))

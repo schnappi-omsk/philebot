@@ -28,7 +28,7 @@ public class XApiClient {
                 .block();
 
         if (xboxProfile != null) {
-            log.info("Profile was found for gamertag {}, id = {}", gamertag, xboxProfile.getXuid());
+            log.info("Profile was found for gamertag {}, id = {}", gamertag, xboxProfile.getId());
             xboxProfile.setGamertag(gamertag);
             return xboxProfile;
         }

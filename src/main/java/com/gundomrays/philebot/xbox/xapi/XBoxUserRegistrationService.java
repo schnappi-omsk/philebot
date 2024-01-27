@@ -2,7 +2,6 @@ package com.gundomrays.philebot.xbox.xapi;
 
 import com.gundomrays.philebot.data.XboxProfileRepository;
 import com.gundomrays.philebot.data.XboxTitleHistoryDataService;
-import com.gundomrays.philebot.data.XboxTitleHistoryRepository;
 import com.gundomrays.philebot.xbox.domain.Profile;
 import com.gundomrays.philebot.xbox.domain.TitleHistory;
 import org.slf4j.Logger;
@@ -46,8 +45,9 @@ public class XBoxUserRegistrationService {
             final Profile xboxProfile = xApiClient.userByGamertag(gamerTag);
             xboxProfile.setTgUsername(tgUserName);
             xboxProfile.setTgId(tgId);
-            fillProfileHistory(xboxProfile);
             xboxProfileRepository.save(xboxProfile);
+
+            fillProfileHistory(xboxProfile);
             return new XboxServiceResponse(String.format("%s was successfully registered with gamertag %s", tgUserName, gamerTag));
         }
     }
@@ -65,7 +65,7 @@ public class XBoxUserRegistrationService {
     private void fillProfileHistory(final Profile profile) {
         Objects.requireNonNull(profile);
 
-        final TitleHistory titleHistory = xApiClient.titleHistory(profile.getXuid());
+        final TitleHistory titleHistory = xApiClient.titleHistory(profile.getId());
         log.info("User {} played {} titles", profile.getGamertag(), titleHistory.getTitles().size());
         xboxTitleHistoryDataService.saveTitleHistory(titleHistory);
         log.info("User {} title history was saved", profile.getGamertag());
