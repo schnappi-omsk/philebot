@@ -19,7 +19,15 @@ public class TitleHistory {
 
     private String xuid;
 
-    @OneToMany(mappedBy = "titleId")
+    @ManyToOne
+    @JoinColumn(name = "title_id")
+    private Title title;
+
+    private Integer currentGamescore;
+
+    private Integer totalGamescore;
+
+    @Transient
     private List<Title> titles = new LinkedList<>();
 
 }

@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface XboxTitleRepository extends CrudRepository<Title, String> {
+public interface XboxTitleRepository extends CrudRepository<Title, String>, XboxTitleRepositoryExtension {
     Optional<Title> findByTitleId(String titleId);
 }
