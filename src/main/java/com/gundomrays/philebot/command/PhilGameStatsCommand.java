@@ -26,7 +26,9 @@ public class PhilGameStatsCommand implements PhilCommand {
 
     @Override
     public String execute(CommandRequest request) {
-        final String titleId = request.getArgument();
+        String argument = request.getArgument();
+        int pingIdx = argument.indexOf('@');
+        final String titleId = pingIdx > -1 ? argument.substring(0, pingIdx) : argument;
         final Title title = xboxTitleDataService.titleById(titleId);
 
         if (title == null) {
@@ -53,9 +55,8 @@ public class PhilGameStatsCommand implements PhilCommand {
 
         titleStats.forEach((rate, player) -> builder.append("<code>")
                 .append(player)
-                .append(": ")
                 .append(additionalSpaces(player, longestPlayerNameLength))
-                .append("\t\t\t\t")
+                .append("\t:\t\t\t")
                 .append(rate)
                 .append("%")
                 .append("</code>")
