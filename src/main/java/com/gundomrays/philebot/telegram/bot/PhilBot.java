@@ -70,13 +70,10 @@ public class PhilBot extends TelegramLongPollingBot {
                 reply(message.getChatId(), message.getMessageId(), "Command not found: " + messageText);
             }
         }
-//        else {
-//            reply(message.getChatId(), message.getMessageId(), systemArg);
-//        }
     }
 
     @Async
-    @Scheduled(fixedDelay = 1L, timeUnit = TimeUnit.MINUTES)
+    @Scheduled(fixedDelay = 5L, timeUnit = TimeUnit.MINUTES)
     public void retrieveAndSendAchievements() {
         log.info("Start getting achievements");
         Collection<String> achievements = philAchievementRetriever.retrieve();
@@ -88,6 +85,7 @@ public class PhilBot extends TelegramLongPollingBot {
 
     public void reply(Long chatId, Integer msgId, String text) {
         final SendMessage sender = SendMessage.builder()
+                .parseMode(ParseMode.HTML)
                 .chatId(chatId)
                 .replyToMessageId(msgId)
                 .text(text)
@@ -121,10 +119,18 @@ public class PhilBot extends TelegramLongPollingBot {
 
         final String messageText = msg.getText();
         int spaceIndex = messageText.indexOf(" ");
-        final String command = spaceIndex > -1 ? messageText.substring(0, spaceIndex) : messageText;
-        request.setCommand(command);
+
         if (spaceIndex > -1) {
+            request.setCommand(messageText.substring(0, spaceIndex));
             request.setArgument(messageText.substring(spaceIndex).trim());
+        } else {
+            final String[] commandParts = messageText.split("(?<=\\D)(?=\\d)");
+            if (commandParts.length == 1) {
+                request.setCommand(messageText);
+            } else {
+                request.setCommand(commandParts[0]);
+                request.setArgument(commandParts[1]);
+            }
         }
         return request;
     }

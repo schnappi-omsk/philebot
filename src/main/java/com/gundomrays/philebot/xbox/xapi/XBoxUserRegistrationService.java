@@ -67,7 +67,7 @@ public class XBoxUserRegistrationService {
 
         final TitleHistory titleHistory = xApiClient.titleHistory(profile.getId());
         log.info("User {} played {} titles", profile.getGamertag(), titleHistory.getTitles().size());
-        xboxTitleHistoryDataService.saveTitleHistory(titleHistory);
+        xboxTitleHistoryDataService.saveTitleHistory(profile, titleHistory);
         log.info("User {} title history was saved", profile.getGamertag());
     }
 

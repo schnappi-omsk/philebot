@@ -1,0 +1,1 @@
+ALTER TABLE title_history ADD COLUMN last_updated TIMESTAMP WITHOUT TIME ZONE;

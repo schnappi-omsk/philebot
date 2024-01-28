@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 
+import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -19,7 +20,17 @@ public class TitleHistory {
 
     private String xuid;
 
-    @OneToMany(mappedBy = "titleId")
+    @ManyToOne
+    @JoinColumn(name = "title_id")
+    private Title title;
+
+    private Integer currentGamescore;
+
+    private Integer totalGamescore;
+
+    private LocalDateTime lastUpdated;
+
+    @Transient
     private List<Title> titles = new LinkedList<>();
 
 }
