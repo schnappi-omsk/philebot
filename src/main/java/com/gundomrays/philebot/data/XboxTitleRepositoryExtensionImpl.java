@@ -11,7 +11,7 @@ import java.util.Collection;
 @Service
 public class XboxTitleRepositoryExtensionImpl implements XboxTitleRepositoryExtension {
 
-    private static final String FIND_TITLES = "SELECT t.title_id, t.name " +
+    private static final String FIND_TITLES = "SELECT t.title_id, t.name, t.title_img " +
             "FROM title t " +
             "WHERE ";
 

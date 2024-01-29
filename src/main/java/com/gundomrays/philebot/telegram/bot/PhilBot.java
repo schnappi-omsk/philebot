@@ -1,6 +1,7 @@
 package com.gundomrays.philebot.telegram.bot;
 
 import com.gundomrays.philebot.command.CommandRequest;
+import com.gundomrays.philebot.command.CommandResponse;
 import com.gundomrays.philebot.command.PhilCommand;
 import com.gundomrays.philebot.telegram.exception.TelegramException;
 import com.gundomrays.philebot.worker.PhilAchievementRetriever;
@@ -13,15 +14,14 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -63,8 +63,12 @@ public class PhilBot extends TelegramLongPollingBot {
             log.info("Command {} was received", request.getCommand());
             PhilCommand command = commands.get(request.getCommand());
             if (command != null) {
-                final String result = command.execute(request);
-                reply(message.getChatId(), message.getMessageId(), result);
+                final CommandResponse result = command.execute(request);
+                if (isTextResponse(result)) {
+                    reply(message.getChatId(), message.getMessageId(), result.getMessage());
+                } else {
+                    reply(message.getChatId(), message.getMessageId(), result.getMessage(), result.getMediaUrl());
+                }
             } else {
                 log.info("Command not found: {}", messageText);
                 reply(message.getChatId(), message.getMessageId(), "Command not found: " + messageText);
@@ -96,6 +100,22 @@ public class PhilBot extends TelegramLongPollingBot {
             throw new TelegramException(e.getMessage(), e);
         }
     }
+
+    public void reply(Long chatId, Integer msgId, String caption, String photoUrl) {
+        final SendPhoto sender = SendPhoto.builder()
+                .parseMode(ParseMode.HTML)
+                .chatId(chatId)
+                .replyToMessageId(msgId)
+                .photo(new InputFile(photoUrl))
+                .caption(caption)
+                .build();
+        try {
+            execute(sender);
+        } catch (TelegramApiException e) {
+            throw new TelegramException(e.getMessage(), e);
+        }
+    }
+
     public void sendAchievementMsg(Long chatId, String text) {
         final SendMessage sender = SendMessage.builder()
                 .parseMode(ParseMode.HTML)
@@ -108,6 +128,10 @@ public class PhilBot extends TelegramLongPollingBot {
         } catch (TelegramApiException e) {
             throw new TelegramException(e.getMessage(), e);
         }
+    }
+
+    private boolean isTextResponse(final CommandResponse response) {
+        return response.getMediaUrl() == null || response.getMediaUrl().isEmpty();
     }
 
 
