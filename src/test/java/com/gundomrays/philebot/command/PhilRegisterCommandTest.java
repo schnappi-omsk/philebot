@@ -26,7 +26,7 @@ public class PhilRegisterCommandTest {
         Mockito.when(mockedRegistrationService.registerUser(any(String.class), any(Long.class), any(String.class)))
                 .thenReturn(response);
 
-        String result = command.execute(request);
+        String result = command.execute(request).getMessage();
 
         //Verification
         Mockito.verify(mockedRegistrationService, Mockito.times(1))

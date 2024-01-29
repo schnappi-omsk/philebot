@@ -1,8 +1,8 @@
 package com.gundomrays.philebot.command;
 
-import com.gundomrays.philebot.data.XboxTitleDataService;
 import com.gundomrays.philebot.data.XboxTitleHistoryDataService;
 import com.gundomrays.philebot.xbox.domain.Title;
+import com.gundomrays.philebot.xbox.xapi.XboxTitleService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -16,24 +16,24 @@ public class PhilGameStatsCommand implements PhilCommand {
 
     private final XboxTitleHistoryDataService xboxTitleHistoryDataService;
 
-    private final XboxTitleDataService xboxTitleDataService;
+    private final XboxTitleService xboxTitleService;
 
     public PhilGameStatsCommand(XboxTitleHistoryDataService xboxTitleHistoryDataService,
-                                XboxTitleDataService xboxTitleDataService) {
+                                XboxTitleService xboxTitleService) {
         this.xboxTitleHistoryDataService = xboxTitleHistoryDataService;
-        this.xboxTitleDataService = xboxTitleDataService;
+        this.xboxTitleService = xboxTitleService;
     }
 
     @Override
-    public String execute(CommandRequest request) {
+    public CommandResponse execute(CommandRequest request) {
         String argument = request.getArgument();
         int pingIdx = argument.indexOf('@');
         final String titleId = pingIdx > -1 ? argument.substring(0, pingIdx) : argument;
-        final Title title = xboxTitleDataService.titleById(titleId);
+        final Title title = xboxTitleService.findTitle(titleId);
 
         if (title == null) {
             log.warn("Null returned for titleId={}", titleId);
-            return String.format("Nothing found for titleId=%s", titleId);
+            return PhilCommandUtils.textResponse(String.format("Nothing found for titleId=%s", titleId));
         }
 
         log.info("Go for leaderboard for game: {}", title.getName());
@@ -41,7 +41,8 @@ public class PhilGameStatsCommand implements PhilCommand {
         Map<Integer, String> titleStatistics = xboxTitleHistoryDataService.getTitleStatistics(title);
         log.info("{} gamers played {}", titleStatistics.size(), title.getName());
 
-        return generateStatsMessage(title.getName(), titleStatistics);
+        return PhilCommandUtils.captionedPhotoResponse(
+                generateStatsMessage(title.getName(), titleStatistics), title.getTitleImg());
     }
 
     private String generateStatsMessage(String titleName, Map<Integer, String> titleStats) {
