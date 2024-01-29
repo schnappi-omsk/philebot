@@ -3,6 +3,7 @@ package com.gundomrays.philebot.command;
 import com.gundomrays.philebot.data.XboxTitleDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.net.URLDecoder;
@@ -16,8 +17,12 @@ public class PhilFindGameCommand implements PhilCommand {
 
     private final XboxTitleDataService xboxTitleDataService;
 
-    public PhilFindGameCommand(XboxTitleDataService xboxTitleDataService) {
+    private final Map<String, PhilCommand> commandMap;
+
+    public PhilFindGameCommand(XboxTitleDataService xboxTitleDataService,
+                               Map<String, PhilCommand> commandMap) {
         this.xboxTitleDataService = xboxTitleDataService;
+        this.commandMap = commandMap;
     }
 
     @Override
@@ -32,7 +37,24 @@ public class PhilFindGameCommand implements PhilCommand {
             return "Igor tonet...";
         }
 
+        if (searchResults.size() == 1) {
+            final String[] commandParts = searchResults.values().iterator().next()
+                    .split("(?<=\\D)(?=\\d)");
+
+            if (commandParts.length == 2) {
+                PhilCommand nextCommand = commandMap.get(commandParts[0]);
+                return nextCommand.execute(requestForOneGame(commandParts[1]));
+            }
+
+        }
+
         return generateResultMessage(searchResults);
+    }
+
+    private CommandRequest requestForOneGame(String argument) {
+        CommandRequest result = new CommandRequest();
+        result.setArgument(argument);
+        return result;
     }
 
     private String generateResultMessage(Map<String, String> searchResults) {
