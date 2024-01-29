@@ -7,9 +7,8 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 
-import java.time.LocalDate;
+
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 @Getter
 @Setter
@@ -30,8 +29,6 @@ public class Profile {
     private Long tgId;
 
     // LocalDateTime.MIN is not supported by PostgreSQL
-    private LocalDateTime lastAchievement = LocalDateTime.of(
-            LocalDate.of(1970, 1, 1), LocalTime.of(0, 0)
-    );
+    private LocalDateTime lastAchievement = LocalDateTime.now();
 
 }
