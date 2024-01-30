@@ -21,6 +21,11 @@ public class Title {
 
     private String titleImg;
 
+    private String platform;
+
+    @Transient
+    private List<String> devices = new LinkedList<>();
+
     @Transient
     private Achievement achievement;
 

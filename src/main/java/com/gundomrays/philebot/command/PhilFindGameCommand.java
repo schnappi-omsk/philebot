@@ -56,8 +56,10 @@ public class PhilFindGameCommand implements PhilCommand {
 
     private String generateResultMessage(Map<String, String> searchResults) {
         final StringBuilder builder = new StringBuilder();
-        searchResults.forEach((name, cmd) -> builder.append(name)
+        searchResults.forEach((name, cmd) -> builder.append("<code>")
+                .append(name)
                 .append(": ")
+                .append("</code>")
                 .append(cmd)
                 .append("\n"));
         return builder.toString();

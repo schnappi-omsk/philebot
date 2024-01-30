@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.Map;
-import java.util.Optional;
 import java.util.TreeMap;
 
 @Service
@@ -17,40 +16,37 @@ public class XboxTitleHistoryDataService {
 
     private final XboxTitleHistoryRepository xboxTitleHistoryRepository;
 
-    private final XboxTitleRepository xboxTitleRepository;
-
     private final XboxProfileRepository xboxProfileRepository;
 
+    private final XboxTitleDataService xboxTitleDataService;
+
     public XboxTitleHistoryDataService(XboxTitleHistoryRepository xboxTitleHistoryRepository,
-                                       XboxTitleRepository xboxTitleRepository,
-                                       XboxProfileRepository xboxProfileRepository) {
+                                       XboxProfileRepository xboxProfileRepository, XboxTitleDataService xboxTitleDataService) {
         this.xboxTitleHistoryRepository = xboxTitleHistoryRepository;
-        this.xboxTitleRepository = xboxTitleRepository;
         this.xboxProfileRepository = xboxProfileRepository;
+        this.xboxTitleDataService = xboxTitleDataService;
     }
 
     public TitleHistory findTitleHistory(final String xuid, final ActivityItem item) {
-        Title title = saveTitle(item.getTitleId(), item.getContentTitle());
+        Title title = xboxTitleDataService.saveTitle(item.getTitleId(), item.getContentTitle());
         return xboxTitleHistoryRepository.findByXuidAndTitle(xuid, title).orElse(null);
     }
 
     public void saveTitleHistory(final Profile profile, final TitleHistory titleHistory) {
-        titleHistory.getTitles().forEach(title -> saveTitleHistory(profile, title));
+        titleHistory.getTitles().forEach(title -> {
+            if (!title.getDevices().contains("Win32")) {
+                saveTitleHistory(profile, title);
+            }
+        });
     }
 
     public TitleHistory saveTitleHistory(final Profile profile, final Title title) {
-        Image art = extractImage(title, "TitledHeroArt");
-
-        if (art == null) {
-            art = extractImage(title, "SuperHeroArt");
-        }
-
         TitleHistory toStore = xboxTitleHistoryRepository
                 .findByXuidAndTitle(profile.getId(), title).orElse(null);
         if (toStore == null) {
             toStore = new TitleHistory();
             toStore.setXuid(profile.getId());
-            toStore.setTitle(saveTitle(title.getTitleId(), title.getName(), art));
+            toStore.setTitle(xboxTitleDataService.saveTitle(title));
         }
 
         toStore.setCurrentGamescore(title.getAchievement().getCurrentGamerscore());
@@ -58,7 +54,7 @@ public class XboxTitleHistoryDataService {
         toStore.setLastUpdated(profile.getLastAchievement());
         TitleHistory stored = xboxTitleHistoryRepository.save(toStore);
         log.info("Stored title history for xuid={} and game={}, art={}",
-                stored.getXuid(), stored.getTitle().getName(), art);
+                stored.getXuid(), stored.getTitle().getName(), stored.getTitle().getTitleImg());
         return stored;
     }
 
@@ -90,39 +86,6 @@ public class XboxTitleHistoryDataService {
             result.put(completion, gamer.getGamertag());
         }
         return result;
-    }
-
-    private Title saveTitle(final Title title) {
-        Optional<Title> stored = xboxTitleRepository.findByTitleId(title.getTitleId());
-        if (stored.isPresent()) {
-            Title storedTitle = stored.get();
-            storedTitle.setTitleImg(title.getTitleImg());
-            return xboxTitleRepository.save(storedTitle);
-        } else {
-            return stored.orElse(xboxTitleRepository.save(title));
-        }
-    }
-
-    private Title saveTitle(final String titleId, final String titleName) {
-        return saveTitle(titleId, titleName, null);
-    }
-
-    private Title saveTitle(final String titleId, final String titleName, final Image image) {
-        final Title title = new Title();
-        title.setTitleId(titleId);
-        title.setName(titleName);
-        if (image != null) {
-            title.setTitleImg(image.getUrl());
-        }
-        return saveTitle(title);
-    }
-
-    private Image extractImage(Title title, String type) {
-        return title.getImages()
-                .stream()
-                .filter(img -> img.getType().equalsIgnoreCase(type))
-                .findFirst()
-                .orElse(null);
     }
 
 }

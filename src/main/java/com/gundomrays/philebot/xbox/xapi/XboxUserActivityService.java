@@ -76,6 +76,7 @@ public class XboxUserActivityService {
                             final TitleHistory updatedFromXapi = xApiClient.titleHistory(xboxProfile.getId());
                             final Title title = updatedFromXapi.getTitles().stream()
                                     .filter(t -> t.getTitleId().equals(item.getTitleId()))
+                                    .filter(t -> !t.getDevices().contains("Win32"))
                                     .findFirst()
                                     .orElseThrow(() -> new RuntimeException("Title is null in TitleHistory response!"));
                             titleHistory = xboxTitleHistoryDataService.saveTitleHistory(xboxProfile, title);
