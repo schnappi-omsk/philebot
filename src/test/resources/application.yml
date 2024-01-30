@@ -24,6 +24,7 @@ tg:
 ebot:
   serviceHost: testHost
   limitPerUser: 5
+  requestsPerMin: 10.0
 server:
   servlet:
     context-path: /

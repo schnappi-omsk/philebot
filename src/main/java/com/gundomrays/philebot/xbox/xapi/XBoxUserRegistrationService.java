@@ -6,6 +6,7 @@ import com.gundomrays.philebot.xbox.domain.Image;
 import com.gundomrays.philebot.xbox.domain.Profile;
 import com.gundomrays.philebot.xbox.domain.Title;
 import com.gundomrays.philebot.xbox.domain.TitleHistory;
+import com.gundomrays.philebot.xbox.xapi.executor.RateLimitedExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @Service
 public class XBoxUserRegistrationService {
@@ -25,13 +29,17 @@ public class XBoxUserRegistrationService {
 
     private final XboxTitleHistoryDataService xboxTitleHistoryDataService;
 
+    private final RateLimitedExecutor rateLimitedExecutor;
+
 
     public XBoxUserRegistrationService(XApiClient xApiClient,
                                        XboxProfileRepository xboxProfileRepository,
-                                       XboxTitleHistoryDataService xboxTitleHistoryDataService) {
+                                       XboxTitleHistoryDataService xboxTitleHistoryDataService,
+                                       RateLimitedExecutor rateLimitedExecutor) {
         this.xApiClient = xApiClient;
         this.xboxProfileRepository = xboxProfileRepository;
         this.xboxTitleHistoryDataService = xboxTitleHistoryDataService;
+        this.rateLimitedExecutor = rateLimitedExecutor;
     }
 
     public XboxServiceResponse registerUser(final String tgUserName, final Long tgId, final String gamerTag) {
@@ -45,13 +53,24 @@ public class XBoxUserRegistrationService {
             return new XboxServiceResponse(String.format("User with Telegram username %s is already registered", tgUserName));
         } else {
             log.info("Registration user with Telegram username {}", tgUserName);
-            final Profile xboxProfile = xApiClient.userByGamertag(gamerTag);
-            xboxProfile.setTgUsername(tgUserName);
-            xboxProfile.setTgId(tgId);
-            xboxProfileRepository.save(xboxProfile);
+            final Callable<XboxServiceResponse> registerTask = () -> {
+                final Profile xboxProfile = xApiClient.userByGamertag(gamerTag);
+                xboxProfile.setTgUsername(tgUserName);
+                xboxProfile.setTgId(tgId);
+                xboxProfileRepository.save(xboxProfile);
 
-            fillProfileHistory(xboxProfile);
-            return new XboxServiceResponse(String.format("%s was successfully registered with gamertag %s", tgUserName, gamerTag));
+                fillProfileHistory(xboxProfile);
+                return new XboxServiceResponse(String.format("%s was successfully registered with gamertag %s", tgUserName, gamerTag));
+            };
+
+            final CompletableFuture<XboxServiceResponse> future = rateLimitedExecutor.submit(2, registerTask);
+
+            try {
+                return future.get();
+            } catch (InterruptedException | ExecutionException e) {
+                log.error("Error registering user with tgUserName = " + tgUserName, e);
+                return new XboxServiceResponse("Error registering user.");
+            }
         }
     }
 
