@@ -25,3 +25,5 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
+messages:
+  periodical: Мда, Руслан, конечно, не шарит...

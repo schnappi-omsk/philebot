@@ -23,6 +23,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 public class PhilBot extends TelegramLongPollingBot {
@@ -46,6 +47,9 @@ public class PhilBot extends TelegramLongPollingBot {
 
     @Autowired
     private PhilAchievementRetriever philAchievementRetriever;
+
+    @Autowired
+    private PeriodicalMessageService periodicalMessageService;
 
     public PhilBot(String botToken) {
         super(botToken);
@@ -83,7 +87,15 @@ public class PhilBot extends TelegramLongPollingBot {
         Collection<String> achievements = philAchievementRetriever.retrieve();
 
         for (final String achievement : achievements) {
-            sendAchievementMsg(chatId, achievement);
+            sendMessage(chatId, achievement);
+        }
+    }
+
+    @Scheduled(fixedDelay = 1L, timeUnit = TimeUnit.HOURS)
+    public void sendPeriodicalMessage() {
+        final Random random = new Random(100);
+        if (random.nextInt() < 3) {
+            sendMessage(chatId, periodicalMessageService.message());
         }
     }
 
@@ -116,7 +128,7 @@ public class PhilBot extends TelegramLongPollingBot {
         }
     }
 
-    public void sendAchievementMsg(Long chatId, String text) {
+    public void sendMessage(Long chatId, String text) {
         final SendMessage sender = SendMessage.builder()
                 .parseMode(ParseMode.HTML)
                 .disableWebPagePreview(false)

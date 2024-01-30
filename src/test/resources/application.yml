@@ -27,3 +27,5 @@ ebot:
 server:
   servlet:
     context-path: /
+messages:
+  periodical: Мда, Руслан, конечно, не шарит...
