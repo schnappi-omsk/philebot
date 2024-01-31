@@ -81,7 +81,7 @@ public class PhilBot extends TelegramLongPollingBot {
     }
 
     @Async
-    @Scheduled(fixedDelay = 5L, timeUnit = TimeUnit.MINUTES)
+    @Scheduled(fixedDelay = 1L, timeUnit = TimeUnit.MINUTES)
     public void retrieveAndSendAchievements() {
         log.info("Start getting achievements");
         Collection<String> achievements = philAchievementRetriever.retrieve();
