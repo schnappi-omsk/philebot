@@ -80,25 +80,28 @@ public class XboxUserActivityService {
                 .filter(item -> item.getDate().isAfter(xboxProfile.getLastAchievement()))
                 .ifPresent(item -> {
                     TitleHistory titleHistory = cache.getTitleHistory();
+                    Achievement achievement = null;
+
                     if (titleHistory == null || cache.needToUpdate(item.getTitleId())) {
                         log.info("Need to update internal cache with title history for xuid={} and title={}",
                                 xboxProfile.getId(), item.getContentTitle());
                         titleHistory = xboxTitleHistoryDataService.findTitleHistory(xboxProfile.getId(), item);
+                        final TitleHistory updatedFromXapi = xApiClient.titleHistory(xboxProfile.getId());
+                        final Title title = updatedFromXapi.getTitles().stream()
+                                .filter(t -> t.getTitleId().equals(item.getTitleId()))
+                                .findFirst()
+                                .orElseThrow(() -> new RuntimeException("Title is null in TitleHistory response!"));
+                        achievement = title.getAchievement();
 
                         if (titleHistory == null) {
                             log.info("No title history for xuid={} and title={}, need to update from XAPI",
                                     xboxProfile.getId(),item.getContentTitle());
-                            final TitleHistory updatedFromXapi = xApiClient.titleHistory(xboxProfile.getId());
-                            final Title title = updatedFromXapi.getTitles().stream()
-                                    .filter(t -> t.getTitleId().equals(item.getTitleId()))
-                                    .findFirst()
-                                    .orElseThrow(() -> new RuntimeException("Title is null in TitleHistory response!"));
                             titleHistory = xboxTitleHistoryDataService.saveTitleHistory(xboxProfile, title);
                         }
                         cache.setTitleHistory(titleHistory);
                     }
 
-                    xboxTitleHistoryDataService.updateTitleHistory(titleHistory, item);
+                    xboxTitleHistoryDataService.updateTitleHistory(titleHistory, item, achievement);
 
                     xboxProfile.setLastAchievement(item.getDate());
                     xboxProfileRepository.save(xboxProfile);

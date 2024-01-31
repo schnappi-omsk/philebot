@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 
 @Service
@@ -58,11 +59,15 @@ public class XboxTitleHistoryDataService {
         return stored;
     }
 
-    public void updateTitleHistory(final TitleHistory titleHistory, final ActivityItem item) {
-        Integer gamerscore = titleHistory.getCurrentGamescore() + item.getGamerscore();
-        titleHistory.setCurrentGamescore(gamerscore);
-        log.info("Gamerscore for xuid={} and title={} was updated by {}, new value={}",
-                titleHistory.getXuid(), titleHistory.getTitle().getName(), item.getGamerscore(), gamerscore);
+    public void updateTitleHistory(final TitleHistory titleHistory, final ActivityItem item, final Achievement achievement) {
+        if (achievement != null) {
+            titleHistory.setCurrentGamescore(achievement.getCurrentGamerscore());
+            log.info("Current gamerscore for xuid={} was updated to {}", item.getUserXuid(), titleHistory.getCurrentGamescore());
+            if (!Objects.equals(titleHistory.getTotalGamescore(), achievement.getTotalGamerscore())) {
+                titleHistory.setTotalGamescore(achievement.getTotalGamerscore());
+                log.info("Total gamerscore for title {} was updated to {}", item.getContentTitle(), titleHistory.getTotalGamescore());
+            }
+        }
 
         if (titleHistory.getLastUpdated().isBefore(item.getDate())) {
             titleHistory.setLastUpdated(item.getDate());

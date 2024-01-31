@@ -59,7 +59,9 @@ public class XboxTitleDataService {
 
         if (stored.isPresent()) {
             Title storedTitle = stored.get();
-            storedTitle.setTitleImg(title.getTitleImg());
+            if (title.getTitleImg() != null) {
+                storedTitle.setTitleImg(title.getTitleImg());
+            }
             storedTitle.setPlatform(platform);
             return xboxTitleRepository.save(storedTitle);
         } else {
