@@ -33,6 +33,6 @@ public class PhilRegisterCommandTest {
                 .registerUser(request.getCaller(), request.getCallerId(), request.getArgument());
 
         //Assert
-        assertEquals(response.getText(), result, "Result is not as expected");
+        assertEquals(String.format("<code>%s</code>", response.getText()), result, "<code>Result is not as expected</code>");
     }
 }
