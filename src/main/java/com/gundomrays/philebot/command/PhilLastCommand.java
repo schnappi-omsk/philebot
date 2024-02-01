@@ -2,7 +2,6 @@ package com.gundomrays.philebot.command;
 
 import com.gundomrays.philebot.data.XboxTitleDataService;
 import com.gundomrays.philebot.xbox.domain.Title;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 @Service("/last")
@@ -10,16 +9,16 @@ public class PhilLastCommand implements PhilCommand {
 
     private static final String GAME_CMD = "/game";
 
-    private final ApplicationContext applicationContext;
-
     private final XboxTitleDataService xboxTitleDataService;
 
+    private final PhilCommandService philCommandService;
+
     public PhilLastCommand(
-            ApplicationContext applicationContext,
-            XboxTitleDataService xboxTitleDataService
+            XboxTitleDataService xboxTitleDataService,
+            PhilCommandService philCommandService
     ) {
-        this.applicationContext = applicationContext;
         this.xboxTitleDataService = xboxTitleDataService;
+        this.philCommandService = philCommandService;
     }
 
     @Override
@@ -33,15 +32,11 @@ public class PhilLastCommand implements PhilCommand {
         }
 
         //TODO think about a way to avoid using appCtx
-        final PhilCommand nextCommand = applicationContext.getBean(GAME_CMD, PhilCommand.class);
+        final PhilCommand nextCommand = philCommandService.command(GAME_CMD);
         final CommandRequest nextRequest = new CommandRequest();
         nextRequest.setCommand(GAME_CMD);
         nextRequest.setArgument(lastPlayedTitle.getTitleId());
 
         return nextCommand.execute(nextRequest);
-    }
-
-    private String nextCommandName(final Title title) {
-        return String.format("%s%s", GAME_CMD, title.getTitleId());
     }
 }
