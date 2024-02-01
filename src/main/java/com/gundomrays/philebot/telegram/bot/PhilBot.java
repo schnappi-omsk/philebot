@@ -3,6 +3,7 @@ package com.gundomrays.philebot.telegram.bot;
 import com.gundomrays.philebot.command.CommandRequest;
 import com.gundomrays.philebot.command.CommandResponse;
 import com.gundomrays.philebot.command.PhilCommand;
+import com.gundomrays.philebot.command.PhilCommandService;
 import com.gundomrays.philebot.telegram.exception.TelegramException;
 import com.gundomrays.philebot.worker.PhilAchievementRetriever;
 import org.slf4j.Logger;
@@ -43,7 +44,7 @@ public class PhilBot extends TelegramLongPollingBot {
     private Long chatId;
 
     @Autowired
-    private Map<String, PhilCommand> commands;
+    private PhilCommandService philCommandService;
 
     @Autowired
     private PhilAchievementRetriever philAchievementRetriever;
@@ -65,7 +66,7 @@ public class PhilBot extends TelegramLongPollingBot {
         if (message.isCommand()) {
             CommandRequest request = parseCommand(message);
             log.info("Command {} was received", request.getCommand());
-            PhilCommand command = commands.get(request.getCommand());
+            PhilCommand command = philCommandService.command(request.getCommand());
             if (command != null) {
                 final CommandResponse result = command.execute(request);
                 if (isTextResponse(result)) {

@@ -14,12 +14,11 @@ public class PhilFindGameCommand implements PhilCommand {
 
     private final XboxTitleService xboxTitleService;
 
-    private final Map<String, PhilCommand> commandMap;
+    private final PhilCommandService philCommandService;
 
-    public PhilFindGameCommand(XboxTitleService xboxTitleService,
-                               Map<String, PhilCommand> commandMap) {
+    public PhilFindGameCommand(XboxTitleService xboxTitleService, PhilCommandService philCommandService) {
         this.xboxTitleService = xboxTitleService;
-        this.commandMap = commandMap;
+        this.philCommandService = philCommandService;
     }
 
     @Override
@@ -39,7 +38,7 @@ public class PhilFindGameCommand implements PhilCommand {
                     .split("(?<=\\D)(?=\\d)");
 
             if (commandParts.length == 2) {
-                PhilCommand nextCommand = commandMap.get(commandParts[0]);
+                PhilCommand nextCommand = philCommandService.command(commandParts[0]);
                 return nextCommand.execute(requestForOneGame(commandParts[1]));
             }
 
