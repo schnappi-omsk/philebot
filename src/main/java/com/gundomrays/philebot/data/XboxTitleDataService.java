@@ -23,6 +23,10 @@ public class XboxTitleDataService {
         return xboxTitleRepository.searchTitlesByName(input);
     }
 
+    public Title lastPlayedTitle() {
+        return xboxTitleRepository.findLastPlayedTitle().orElse(null);
+    }
+
     public Title titleById(final String id) {
         return xboxTitleRepository.findByTitleId(id).orElse(null);
     }
@@ -53,24 +57,27 @@ public class XboxTitleDataService {
         if (art != null && title.getTitleImg() == null) {
             title.setTitleImg(art.getUrl());
         }
-
-        String platform = gamePlatform(title);
-        title.setPlatform(platform);
-
         if (stored.isPresent()) {
             Title storedTitle = stored.get();
             if (title.getTitleImg() != null) {
                 storedTitle.setTitleImg(title.getTitleImg());
             }
-            storedTitle.setPlatform(platform);
+            if (title.getPlatform() == null || title.getPlatform().isEmpty()) {
+                storedTitle.setPlatform(gamePlatform(storedTitle));
+            }
             return xboxTitleRepository.save(storedTitle);
         } else {
+            title.setPlatform(gamePlatform(title));
             return stored.orElse(xboxTitleRepository.save(title));
         }
     }
 
     private String gamePlatform(final Title title) {
-        return String.join(", ", title.getDevices());
+        if (title.getDevices() != null) {
+            return String.join(", ", title.getDevices());
+        }
+
+        return title.getPlatform();
     }
 
     private Image extractImage(final Title title, final String type) {

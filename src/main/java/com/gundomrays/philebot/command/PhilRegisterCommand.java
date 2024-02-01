@@ -25,6 +25,6 @@ public class PhilRegisterCommand implements PhilCommand {
                 request.getCallerId(),
                 request.getArgument()
         );
-        return PhilCommandUtils.textResponse(result.getText());
+        return PhilCommandUtils.textResponse(String.format("<code>%s</code>", result.getText()));
     }
 }

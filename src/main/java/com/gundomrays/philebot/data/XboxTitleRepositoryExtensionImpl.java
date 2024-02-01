@@ -7,6 +7,7 @@ import jakarta.persistence.Query;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.Optional;
 
 @Service
 public class XboxTitleRepositoryExtensionImpl implements XboxTitleRepositoryExtension {
@@ -14,6 +15,13 @@ public class XboxTitleRepositoryExtensionImpl implements XboxTitleRepositoryExte
     private static final String FIND_TITLES = "SELECT t.title_id, t.name, t.title_img, t.platform " +
             "FROM title t " +
             "WHERE ";
+
+    private static final String LAST_TITLE = "SELECT t.title_id, t.name, t.title_img, t.platform " +
+            "FROM title t " +
+            "JOIN title_history th ON t.title_id = th.title_id " +
+            "ORDER BY th.last_updated DESC " +
+            "LIMIT 1";
+
 
     @PersistenceContext
     private final EntityManager entityManager;
@@ -33,6 +41,12 @@ public class XboxTitleRepositoryExtensionImpl implements XboxTitleRepositoryExte
         }
 
         return searchQuery.getResultList();
+    }
+
+    @Override
+    public Optional<Title> findLastPlayedTitle() {
+        final Query lastTitleQuery = entityManager.createNativeQuery(LAST_TITLE, Title.class);
+        return Optional.ofNullable((Title) lastTitleQuery.getSingleResult());
     }
 
     private String generateCondition(final String[] names) {
