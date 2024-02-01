@@ -70,7 +70,7 @@ public class XApiClient {
                 .uri(uriBuilder -> {
                     if (freshLogin) {
                         log.warn("xAPI returned 401: Unauthorized, trying to refresh login...");
-                        return uriBuilder.path(uri + "?fresh-login").build(argument);
+                        return uriBuilder.path(uri).queryParam("fresh-login", "").build(argument);
                     } else {
                         return uriBuilder.path(uri).build(argument);
                     }
