@@ -15,4 +15,9 @@ public class PhilCommandUtils {
         return response;
     }
 
+    public static String additionalSpaces(final String value, final int longest) {
+        final int spacesCount = longest - value.length();
+        return " ".repeat(spacesCount);
+    }
+
 }

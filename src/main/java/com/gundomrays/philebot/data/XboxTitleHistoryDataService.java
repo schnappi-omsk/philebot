@@ -5,10 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
-import java.util.Map;
-import java.util.Objects;
-import java.util.TreeMap;
+import java.util.*;
 
 @Service
 public class XboxTitleHistoryDataService {
@@ -91,6 +88,10 @@ public class XboxTitleHistoryDataService {
             result.put(completion, gamer.getGamertag());
         }
         return result;
+    }
+
+    public List<Gamerscore> leaderboard() {
+        return xboxTitleHistoryRepository.leaderboard();
     }
 
 }

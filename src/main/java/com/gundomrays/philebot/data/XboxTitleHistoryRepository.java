@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface XboxTitleHistoryRepository extends CrudRepository<TitleHistory, String> {
+public interface XboxTitleHistoryRepository extends CrudRepository<TitleHistory, String>, XboxTitleHistoryRepositoryExtension {
     Iterable<TitleHistory> findAllByXuid(String xuid);
     Iterable<TitleHistory> findAllByTitleOrderByCurrentGamescoreDesc(Title title);
     Optional<TitleHistory> findByXuidAndTitle(String xuid, Title title);

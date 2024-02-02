@@ -56,18 +56,13 @@ public class PhilGameStatsCommand implements PhilCommand {
 
         titleStats.forEach((rate, player) -> builder.append("<code>")
                 .append(player)
-                .append(additionalSpaces(player, longestPlayerNameLength))
+                .append(PhilCommandUtils.additionalSpaces(player, longestPlayerNameLength))
                 .append("\t:\t\t\t")
                 .append(rate)
                 .append("%")
                 .append("</code>")
                 .append("\n"));
         return builder.toString();
-    }
-
-    private String additionalSpaces(final String value, final int longest) {
-        final int spacesCount = longest - value.length();
-        return " ".repeat(spacesCount);
     }
 
 }
