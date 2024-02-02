@@ -11,9 +11,7 @@ import java.util.*;
 public class XboxTitleService {
 
     private static final String PC = "PC";
-    private static final String XBOX_SERIES = "XBoxSeries";
-    private static final String XONE = "XOne";
-    private static final String X360 = "X360";
+    private static final String XBOX = "XBox";
 
     private final XboxTitleDataService xboxTitleDataService;
 
@@ -30,40 +28,22 @@ public class XboxTitleService {
 
         final Map<String, String> result = new HashMap<>();
         for (Title title : titles) {
-            result.put(
-                    String.format("%s <strong>(%s)</strong>", title.getName(), platforms(title.getPlatform())),
-                    String.format("/game%s", title.getTitleId())
-            );
+            final String platforms = platforms(title.getPlatform());
+            final String gameLine = platforms.isEmpty()
+                    ? title.getName()
+                    : String.format("%s <strong>(%s)</strong>", title.getName(), platforms);
+            result.put(gameLine, String.format("/game%s", title.getTitleId()));
         }
 
         return result;
     }
 
     private String platforms(final String input) {
-        if (!input.contains(",")) {
-            return input;
-        }
-
         String inputLower = input.toLowerCase();
-
-        if (checkPlatform(inputLower, "pc")) {
-            return PC + "|" + selectPlatform(inputLower);
-        } else {
-            return selectPlatform(inputLower);
+        if (inputLower.contains("pc") && inputLower.contains("xbox")) {
+            return "";
         }
+        return inputLower.contains("pc") ? PC : XBOX;
     }
 
-    private boolean checkPlatform(final String input, final String substring) {
-        return input.contains(substring);
-    }
-
-    private String selectPlatform(final String input) {
-        if (checkPlatform(input, "series")) {
-            return XBOX_SERIES;
-        } else if (checkPlatform(input, "one")) {
-            return XONE;
-        } else {
-            return X360;
-        }
-    }
 }
