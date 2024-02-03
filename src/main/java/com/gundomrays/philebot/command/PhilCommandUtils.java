@@ -20,4 +20,9 @@ public class PhilCommandUtils {
         return " ".repeat(spacesCount);
     }
 
+    public static String commandName(final String input) {
+        int pingIdx = input.indexOf('@');
+        return pingIdx > -1 ? input.substring(0, pingIdx) : input;
+    }
+
 }
