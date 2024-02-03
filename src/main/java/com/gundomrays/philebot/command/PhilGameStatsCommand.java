@@ -33,7 +33,7 @@ public class PhilGameStatsCommand implements PhilCommand {
 
         if (title == null) {
             log.warn("Null returned for titleId={}", titleId);
-            return PhilCommandUtils.textResponse(String.format("Nothing found for titleId=%s", titleId));
+            return PhilCommandUtils.textResponse(String.format("<code>Incorrect command: /game%s</code>", titleId));
         }
 
         log.info("Go for leaderboard for game: {}", title.getName());
