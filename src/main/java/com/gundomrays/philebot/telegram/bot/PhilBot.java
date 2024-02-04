@@ -1,6 +1,7 @@
 package com.gundomrays.philebot.telegram.bot;
 
 import com.gundomrays.philebot.command.*;
+import com.gundomrays.philebot.messaging.MessageQueue;
 import com.gundomrays.philebot.telegram.exception.TelegramException;
 import com.gundomrays.philebot.worker.PhilAchievementRetriever;
 import org.slf4j.Logger;
@@ -49,6 +50,9 @@ public class PhilBot extends TelegramLongPollingBot {
     @Autowired
     private PeriodicalMessageService periodicalMessageService;
 
+    @Autowired
+    private MessageQueue messageQueue;
+
     public PhilBot(String botToken) {
         super(botToken);
     }
@@ -79,14 +83,15 @@ public class PhilBot extends TelegramLongPollingBot {
     }
 
     @Async
-    @Scheduled(fixedDelay = 5L, timeUnit = TimeUnit.MINUTES)
+    @Scheduled(fixedDelay = 3L, timeUnit = TimeUnit.MINUTES)
     public void retrieveAndSendAchievements() {
-        log.info("Start getting achievements");
-        Collection<String> achievements = philAchievementRetriever.retrieve();
-
-        for (final String achievement : achievements) {
-            sendMessage(chatId, achievement);
-        }
+        String achievement;
+        do {
+            achievement = messageQueue.takeMessage();
+            if (achievement != null) {
+                sendMessage(chatId, achievement);
+            }
+        } while (achievement != null);
     }
 
     @Scheduled(fixedDelay = 1L, timeUnit = TimeUnit.HOURS)

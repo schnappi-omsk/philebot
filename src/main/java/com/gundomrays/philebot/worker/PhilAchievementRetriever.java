@@ -1,18 +1,20 @@
 package com.gundomrays.philebot.worker;
 
+import com.gundomrays.philebot.messaging.MessageQueue;
 import com.gundomrays.philebot.xbox.domain.ActivityItem;
 import com.gundomrays.philebot.xbox.domain.Profile;
 import com.gundomrays.philebot.xbox.xapi.XBoxUserRegistrationService;
-import com.gundomrays.philebot.xbox.xapi.XboxAchievementRetrieveService;
+import com.gundomrays.philebot.xbox.xapi.executor.AchievementQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class PhilAchievementRetriever {
@@ -22,36 +24,41 @@ public class PhilAchievementRetriever {
 
     private static final Logger log = LoggerFactory.getLogger(PhilAchievementRetriever.class);
 
-    private final XboxAchievementRetrieveService xboxAchievementRetrieveService;
-
     private final XBoxUserRegistrationService xBoxUserRegistrationService;
 
-    public PhilAchievementRetriever(XboxAchievementRetrieveService xboxAchievementRetrieveService,
-                                    XBoxUserRegistrationService xBoxUserRegistrationService) {
-        this.xboxAchievementRetrieveService = xboxAchievementRetrieveService;
+    private final AchievementQueue achievementQueue;
+
+    private final MessageQueue messageQueue;
+
+    public PhilAchievementRetriever(XBoxUserRegistrationService xBoxUserRegistrationService,
+                                    AchievementQueue achievementQueue,
+                                    MessageQueue messageQueue) {
         this.xBoxUserRegistrationService = xBoxUserRegistrationService;
+        this.achievementQueue = achievementQueue;
+        this.messageQueue = messageQueue;
     }
 
-    public Collection<String> retrieve() {
-        final Collection<ActivityItem> activityItems = xboxAchievementRetrieveService.newAchievements();
-        final Map<String, List<ActivityItem>> achievementsByXuid = activityItems.stream()
-                .collect(Collectors.groupingBy(ActivityItem::getUserXuid));
-        final Set<String> result = new HashSet<>();
+    @Scheduled(fixedDelay = 1L, timeUnit = TimeUnit.MINUTES)
+    public void retrieve() {
+        ActivityItem achievement;
+        do {
+            achievement = achievementQueue.takeAchievement();
+            if (achievement != null) {
+                log.info("Got an achievement from the queue: {} : {} - {} ({}%) {} pts.",
+                        achievement.getContentTitle(), achievement.getAchievementName(),
+                        achievement.getAchievementDescription(), achievement.getRarityPercentage(), achievement.getGamerscore());
 
-        for (final String xuid : achievementsByXuid.keySet()) {
-            final Profile gamer = xBoxUserRegistrationService.retrieveUserProfile(xuid);
-            if (gamer == null) {
-                log.error("Cannot find gamer by xuid={}", xuid);
-                continue;
+                String xuid = achievement.getUserXuid();
+                final Profile gamer = xBoxUserRegistrationService.retrieveUserProfile(xuid);
+                if (gamer == null) {
+                    log.error("Cannot find gamer by xuid={}", xuid);
+                    achievementQueue.placeAchievement(achievement);
+                    continue;
+                }
+                messageQueue.messageToSend(achievementText(gamer.getTgUsername(), gamer.getTgId(), achievement));
             }
 
-            List<ActivityItem> achievements = achievementsByXuid.get(xuid);
-            result.addAll(achievements.stream()
-                            .map(ach -> achievementText(gamer.getTgUsername(), gamer.getTgId(), ach))
-                            .collect(Collectors.toSet()));
-        }
-
-        return result;
+        } while (achievement != null);
     }
 
     private String achievementText(final String username, Long tgId, final ActivityItem item) {
