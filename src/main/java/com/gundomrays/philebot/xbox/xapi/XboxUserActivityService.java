@@ -2,7 +2,11 @@ package com.gundomrays.philebot.xbox.xapi;
 
 import com.gundomrays.philebot.data.XboxProfileRepository;
 import com.gundomrays.philebot.data.XboxTitleHistoryDataService;
-import com.gundomrays.philebot.xbox.domain.*;
+import com.gundomrays.philebot.xbox.domain.Achievement;
+import com.gundomrays.philebot.xbox.domain.Activity;
+import com.gundomrays.philebot.xbox.domain.Profile;
+import com.gundomrays.philebot.xbox.domain.Title;
+import com.gundomrays.philebot.xbox.domain.TitleHistory;
 import com.gundomrays.philebot.xbox.xapi.executor.AchievementQueue;
 import com.gundomrays.philebot.xbox.xapi.executor.RateLimitedExecutor;
 import lombok.Getter;
@@ -14,10 +18,13 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Comparator;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -37,6 +44,8 @@ public class XboxUserActivityService {
     private final RateLimitedExecutor rateLimitedExecutor;
 
     private final AchievementQueue achievementQueue;
+
+    private final ExecutorService executor = Executors.newCachedThreadPool();
 
     public XboxUserActivityService(XApiClient xApiClient,
                                    XboxProfileRepository xboxProfileRepository,
@@ -58,21 +67,23 @@ public class XboxUserActivityService {
         final Long startTime = System.currentTimeMillis();
 
         for (Profile player : players) {
-            log.info("Retrieving activity of: {}", player.getGamertag());
-            final LocalDateTime lastAchievement = player.getLastAchievement();
-            final Callable<Activity> activityTask = () -> playerActivity(player);
-            CompletableFuture<Activity> activityFuture = rateLimitedExecutor.submit(2, activityTask);
-            try {
-                Activity playerActivity = activityFuture.get();
-                playerActivity.getActivityItems().stream()
-                        .filter(item -> item.getDate().isAfter(lastAchievement))
-                        .sorted(Comparator.reverseOrder())
-                        .limit(limitPerUser)
-                        .forEach(achievementQueue::placeAchievement);
-            } catch (InterruptedException | ExecutionException e) {
-                log.error("Cannot retrieve player activity: " + player.getGamertag(), e);
-                throw new RuntimeException("Cannot retrieve player activity: " + player.getGamertag(), e);
-            }
+            executor.submit(() -> {
+                log.info("Retrieving activity of: {}", player.getGamertag());
+                final LocalDateTime lastAchievement = player.getLastAchievement();
+                final Callable<Activity> activityTask = () -> playerActivity(player);
+                CompletableFuture<Activity> activityFuture = rateLimitedExecutor.submit(2, activityTask);
+                try {
+                    Activity playerActivity = activityFuture.get();
+                    playerActivity.getActivityItems().stream()
+                            .filter(item -> item.getDate().isAfter(lastAchievement))
+                            .sorted(Comparator.reverseOrder())
+                            .limit(limitPerUser)
+                            .forEach(achievementQueue::placeAchievement);
+                } catch (InterruptedException | ExecutionException e) {
+                    log.error("Cannot retrieve player activity: " + player.getGamertag(), e);
+                    throw new RuntimeException("Cannot retrieve player activity: " + player.getGamertag(), e);
+                }
+            });
         }
         final Long endTime = System.currentTimeMillis();
         log.info("End taking achievements from XAPI, spent {} ms.", endTime - startTime);

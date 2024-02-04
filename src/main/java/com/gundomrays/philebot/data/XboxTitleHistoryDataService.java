@@ -4,6 +4,7 @@ import com.gundomrays.philebot.xbox.domain.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -30,32 +31,21 @@ public class XboxTitleHistoryDataService {
         return xboxTitleHistoryRepository.findByXuidAndTitle(xuid, title).orElse(null);
     }
 
+    @Transactional
     public void saveTitleHistory(final Profile profile, final TitleHistory titleHistory) {
         titleHistory.getTitles().forEach(title -> {
             if (!title.getDevices().contains("Win32")) {
-                saveTitleHistory(profile, title);
+                storeTitleHistory(profile, title);
             }
         });
     }
 
+    @Transactional
     public TitleHistory saveTitleHistory(final Profile profile, final Title title) {
-        TitleHistory toStore = xboxTitleHistoryRepository
-                .findByXuidAndTitle(profile.getId(), title).orElse(null);
-        if (toStore == null) {
-            toStore = new TitleHistory();
-            toStore.setXuid(profile.getId());
-            toStore.setTitle(xboxTitleDataService.saveTitle(title));
-        }
-
-        toStore.setCurrentGamescore(title.getAchievement().getCurrentGamerscore());
-        toStore.setTotalGamescore(title.getAchievement().getTotalGamerscore());
-        toStore.setLastUpdated(profile.getLastAchievement());
-        TitleHistory stored = xboxTitleHistoryRepository.save(toStore);
-        log.info("Stored title history for xuid={} and game={}, art={}",
-                stored.getXuid(), stored.getTitle().getName(), stored.getTitle().getTitleImg());
-        return stored;
+        return storeTitleHistory(profile, title);
     }
 
+    @Transactional
     public void updateTitleHistory(final TitleHistory titleHistory, final ActivityItem item, final Achievement achievement) {
         if (achievement != null) {
             titleHistory.setCurrentGamescore(achievement.getCurrentGamerscore());
@@ -88,6 +78,24 @@ public class XboxTitleHistoryDataService {
             result.put(completion, gamer.getGamertag());
         }
         return result;
+    }
+
+    private TitleHistory storeTitleHistory(final Profile profile, final Title title) {
+        TitleHistory toStore = xboxTitleHistoryRepository
+                .findByXuidAndTitle(profile.getId(), title).orElse(null);
+        if (toStore == null) {
+            toStore = new TitleHistory();
+            toStore.setXuid(profile.getId());
+            toStore.setTitle(xboxTitleDataService.saveTitle(title));
+        }
+
+        toStore.setCurrentGamescore(title.getAchievement().getCurrentGamerscore());
+        toStore.setTotalGamescore(title.getAchievement().getTotalGamerscore());
+        toStore.setLastUpdated(profile.getLastAchievement());
+        TitleHistory stored = xboxTitleHistoryRepository.save(toStore);
+        log.info("Stored title history for xuid={} and game={}, art={}",
+                stored.getXuid(), stored.getTitle().getName(), stored.getTitle().getTitleImg());
+        return stored;
     }
 
     public List<Gamerscore> leaderboard() {

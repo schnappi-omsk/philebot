@@ -3,7 +3,6 @@ package com.gundomrays.philebot.telegram.bot;
 import com.gundomrays.philebot.command.*;
 import com.gundomrays.philebot.messaging.MessageQueue;
 import com.gundomrays.philebot.telegram.exception.TelegramException;
-import com.gundomrays.philebot.worker.PhilAchievementRetriever;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +19,6 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.Collection;
-import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -32,20 +29,11 @@ public class PhilBot extends TelegramLongPollingBot {
     @Value("${tg.botName}")
     private String botName;
 
-    @Value("${tg.systemCaller}")
-    private String systemCaller;
-
-    @Value("${tg.systemArg}")
-    private String systemArg;
-
     @Value("${tg.chatId}")
     private Long chatId;
 
     @Autowired
     private PhilCommandService philCommandService;
-
-    @Autowired
-    private PhilAchievementRetriever philAchievementRetriever;
 
     @Autowired
     private PeriodicalMessageService periodicalMessageService;
@@ -83,7 +71,7 @@ public class PhilBot extends TelegramLongPollingBot {
     }
 
     @Async
-    @Scheduled(fixedDelay = 3L, timeUnit = TimeUnit.MINUTES)
+    @Scheduled(fixedDelay = 30L, timeUnit = TimeUnit.SECONDS)
     public void retrieveAndSendAchievements() {
         String achievement;
         do {
@@ -171,14 +159,6 @@ public class PhilBot extends TelegramLongPollingBot {
                 request.setArgument(commandParts[1]);
             }
         }
-        return request;
-    }
-
-    private CommandRequest systemRequest() {
-        final CommandRequest request = new CommandRequest();
-        request.setCaller(systemCaller);
-        request.setArgument(systemArg);
-        request.setChatId(chatId);
         return request;
     }
 
