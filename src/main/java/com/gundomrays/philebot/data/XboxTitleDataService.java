@@ -3,12 +3,11 @@ package com.gundomrays.philebot.data;
 import com.gundomrays.philebot.xbox.domain.Image;
 import com.gundomrays.philebot.xbox.domain.Title;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class XboxTitleDataService {
@@ -31,21 +30,24 @@ public class XboxTitleDataService {
         return xboxTitleRepository.findByTitleId(id).orElse(null);
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public Title saveTitle(final String titleId, final String titleName) {
-        return saveTitle(titleId, titleName, null);
+        return storeTitle(titleId, titleName);
     }
 
-    public Title saveTitle(final String titleId, final String titleName, final Image image) {
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    public Title saveTitle(final Title title) {
+        return storeTitle(title);
+    }
+
+    private Title storeTitle(final String titleId, final String titleName) {
         final Title title = new Title();
         title.setTitleId(titleId);
         title.setName(titleName);
-        if (image != null) {
-            title.setTitleImg(image.getUrl());
-        }
-        return saveTitle(title);
+        return storeTitle(title);
     }
 
-    public Title saveTitle(final Title title) {
+    private Title storeTitle(final Title title) {
         Optional<Title> stored = xboxTitleRepository.findByTitleId(title.getTitleId());
 
         Image art = extractImage(title, "TitledHeroArt");

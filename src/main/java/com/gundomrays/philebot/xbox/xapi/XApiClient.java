@@ -35,7 +35,11 @@ public class XApiClient {
     }
 
     public TitleHistory titleHistory(final String xuid) {
+        final Long startTime = System.currentTimeMillis();
         TitleHistory titleHistory = xapiRequest("/{xuid}/title-history", xuid, TitleHistory.class).block();
+
+        final Long endTime = System.currentTimeMillis();
+        log.info("TitleHistory XAPI request for xuid={} took {} ms.", xuid, endTime - startTime);
 
         if (titleHistory != null) {
             log.info("Title history found for XUID={}, titles count={}", xuid, titleHistory.getTitles().size());
@@ -46,8 +50,12 @@ public class XApiClient {
     }
 
     public Activity userActivity(final String xuid) {
+        final Long startTime = System.currentTimeMillis();
 
         final Activity activity = xapiRequest("/{xuid}/activity", xuid, Activity.class).block();
+
+        final Long endTime = System.currentTimeMillis();
+        log.info("Activity XAPI request for xuid={} took {} ms.", xuid, endTime - startTime);
 
         if (activity != null) {
             log.info("Found activity for xuid={}, items count: {}", xuid, activity.getActivityItems().size());
