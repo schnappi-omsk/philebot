@@ -2,7 +2,9 @@ package com.gundomrays.philebot.telegram.bot;
 
 import com.gundomrays.philebot.command.*;
 import com.gundomrays.philebot.messaging.MessageQueue;
+import com.gundomrays.philebot.telegram.config.SettingsService;
 import com.gundomrays.philebot.telegram.exception.TelegramException;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +28,6 @@ public class PhilBot extends TelegramLongPollingBot {
     @Value("${tg.botName}")
     private String botName;
 
-    @Value("${tg.chatId}")
     private Long chatId;
 
     @Autowired
@@ -38,8 +39,16 @@ public class PhilBot extends TelegramLongPollingBot {
     @Autowired
     private MessageQueue messageQueue;
 
+    @Autowired
+    private SettingsService settingsService;
+
     public PhilBot(String botToken) {
         super(botToken);
+    }
+
+    @PostConstruct
+    private void init() {
+        this.chatId = settingsService.chatId();
     }
 
     @Override
@@ -47,6 +56,8 @@ public class PhilBot extends TelegramLongPollingBot {
         Message message = update.getMessage();
         User from = message.getFrom();
         String messageText = message.getText();
+
+        initChatId(message);
 
         if (message.isCommand()) {
             CommandRequest request = parseCommand(message);
@@ -71,6 +82,11 @@ public class PhilBot extends TelegramLongPollingBot {
     @Async
     @Scheduled(fixedDelay = 30L, timeUnit = TimeUnit.SECONDS)
     public void retrieveAndSendAchievements() {
+        if (chatId == null || chatId == 0) {
+            log.warn("Bot needes to be initialized for the chat!");
+            return;
+        }
+
         String achievement;
         do {
             achievement = messageQueue.takeMessage();
@@ -131,12 +147,19 @@ public class PhilBot extends TelegramLongPollingBot {
         }
     }
 
+    private void initChatId(final Message message) {
+        if (chatId == null || chatId == 0) {
+            final Long chatId = message.getChatId();
+            this.chatId = settingsService.chatId(String.valueOf(chatId));
+        }
+    }
+
     private boolean isTextResponse(final CommandResponse response) {
         return response.getMediaUrl() == null || response.getMediaUrl().isEmpty();
     }
 
 
-    private CommandRequest parseCommand(Message msg) {
+    private CommandRequest parseCommand(final Message msg) {
         final CommandRequest request = new CommandRequest();
         request.setChatId(msg.getChatId());
         request.setCaller(msg.getFrom().getUserName());
