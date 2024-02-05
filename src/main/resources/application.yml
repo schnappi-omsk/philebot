@@ -4,7 +4,6 @@ xapi:
 tg:
   baseUrl: https://api.telegram.org/bot
   apiToken: ${TGAPI_TOKEN}
-  chatId: -4126602192
   botName: Phil E-Bot
   systemCaller: Phil Spencer
   systemArg: Power your dreams
@@ -22,7 +21,7 @@ spring:
     password: ${PG_PASS}
   flyway:
     baseline-on-migrate: true
-    baseline-version: 5
+    baseline-version: 6
   jpa:
     hibernate:
       ddl-auto: none

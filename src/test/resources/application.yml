@@ -17,7 +17,6 @@ xapi:
 tg:
   baseUrl: https://localhost
   apiToken: 123456
-  chatId: -123456
   botName: Phil E-Bot
   systemCaller: Phil Spencer
   systemArg: Power your dreams
