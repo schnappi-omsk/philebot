@@ -13,10 +13,7 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
-import org.telegram.telegrambots.meta.api.objects.InputFile;
-import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.User;
+import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.Random;
@@ -50,7 +47,6 @@ public class PhilBot extends TelegramLongPollingBot {
         Message message = update.getMessage();
         User from = message.getFrom();
         String messageText = message.getText();
-        log.info("Message from: {}, text: {}, in the chat: {}", from.getUserName(), messageText, message.getChatId());
 
         if (message.isCommand()) {
             CommandRequest request = parseCommand(message);
@@ -66,6 +62,14 @@ public class PhilBot extends TelegramLongPollingBot {
             } else {
                 log.info("Command not found: {}", messageText);
                 reply(message.getChatId(), message.getMessageId(), "Command not found: " + messageText);
+            }
+        } else {
+            final Chat forwardFromChat = message.getForwardFromChat();
+            if (forwardFromChat != null) {
+                log.info("Forwarded from chat: {} -- {}: {}",
+                        forwardFromChat.getId(), forwardFromChat.getUserName(), messageText);
+            } else {
+                log.info("Message from: {}, text: {}, in the chat: {}", from.getUserName(), messageText, message.getChatId());
             }
         }
     }
