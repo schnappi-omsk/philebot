@@ -64,13 +64,7 @@ public class PhilBot extends TelegramLongPollingBot {
                 reply(message.getChatId(), message.getMessageId(), "Command not found: " + messageText);
             }
         } else {
-            final Chat forwardFromChat = message.getForwardFromChat();
-            if (forwardFromChat != null) {
-                log.info("Forwarded from chat: {} -- {}: {}",
-                        forwardFromChat.getId(), forwardFromChat.getUserName(), messageText);
-            } else {
-                log.info("Message from: {}, text: {}, in the chat: {}", from.getUserName(), messageText, message.getChatId());
-            }
+            log.info("Message from: {}, text: {}, in the chat: {}", from.getUserName(), messageText, message.getChatId());
         }
     }
 
