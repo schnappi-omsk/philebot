@@ -55,15 +55,17 @@ public class PhilAchievementRetriever {
                     achievementQueue.placeAchievement(achievement);
                     continue;
                 }
-                messageQueue.messageToSend(achievementText(gamer.getTgUsername(), gamer.getTgId(), achievement));
+                messageQueue.messageToSend(achievementText(gamer, gamer.getTgId(), achievement));
             }
 
         } while (achievement != null);
     }
 
-    private String achievementText(final String username, Long tgId, final ActivityItem item) {
-        String text = wrapLink(makePingUrl(String.valueOf(tgId)), "@" + username)
-                + " — " + wrapLink(achievementUrl(item), item.getContentTitle());
+    private String achievementText(final Profile gamer, Long tgId, final ActivityItem item) {
+        final String userPingLink = gamer.isPing()
+                ? wrapLink(makePingUrl(String.valueOf(tgId)), "@" + gamer.getTgUsername())
+                : String.format("<code>%s</code>", gamer.getTgUsername());
+        final String text = userPingLink + " — " + wrapLink(achievementUrl(item), item.getContentTitle());
         log.info(text);
         return text;
     }
