@@ -2,7 +2,6 @@ package com.gundomrays.philebot.xbox.xapi;
 
 import com.gundomrays.philebot.data.XboxProfileRepository;
 import com.gundomrays.philebot.data.XboxTitleHistoryDataService;
-import com.gundomrays.philebot.xbox.domain.Image;
 import com.gundomrays.philebot.xbox.domain.Profile;
 import com.gundomrays.philebot.xbox.domain.Title;
 import com.gundomrays.philebot.xbox.domain.TitleHistory;
@@ -74,14 +73,25 @@ public class XBoxUserRegistrationService {
         }
     }
 
-    public Profile retrieveUserProfile(final String xuid) {
-        return xboxProfileRepository.findById(xuid).orElse(null);
+    public void togglePing(final String tgUserName, final boolean ping) {
+        final Profile profile = xboxProfileRepository.findByTgUsername(tgUserName).orElse(null);
+
+        if (profile == null) {
+            log.warn("No profile registered for Telegram user @{}", tgUserName);
+            return;
+        }
+
+        if (profile.isPing() != ping) {
+            profile.setPing(ping);
+            log.info("New ping setting for @{}: {}", tgUserName, ping);
+            xboxProfileRepository.save(profile);
+        } else {
+            log.info("Ping setting is already {} for user @{}", ping, tgUserName);
+        }
     }
 
-    public boolean checkUserRegistration(final String tgUsername) {
-        Objects.requireNonNull(tgUsername);
-
-        return xboxProfileRepository.findByTgUsername(tgUsername).isPresent();
+    public Profile retrieveUserProfile(final String xuid) {
+        return xboxProfileRepository.findById(xuid).orElse(null);
     }
 
     private void fillProfileHistory(final Profile profile) {

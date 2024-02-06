@@ -28,6 +28,8 @@ public class Profile {
     @NonNull
     private Long tgId;
 
+    private boolean ping;
+
     // LocalDateTime.MIN is not supported by PostgreSQL
     private LocalDateTime lastAchievement = LocalDateTime.now();
 
