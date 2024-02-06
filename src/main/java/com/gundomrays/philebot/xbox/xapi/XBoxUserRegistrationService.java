@@ -90,6 +90,10 @@ public class XBoxUserRegistrationService {
         }
     }
 
+    public Profile retrieveUserProfileByTg(final String tgUsername) {
+        return xboxProfileRepository.findByTgUsername(tgUsername).orElse(null);
+    }
+
     public Profile retrieveUserProfile(final String xuid) {
         return xboxProfileRepository.findById(xuid).orElse(null);
     }
