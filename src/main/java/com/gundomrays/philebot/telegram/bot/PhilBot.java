@@ -64,11 +64,17 @@ public class PhilBot extends TelegramLongPollingBot {
             log.info("Command {} was received", request.getCommand());
             PhilCommand command = philCommandService.command(PhilCommandUtils.commandName(request.getCommand()));
             if (command != null) {
-                final CommandResponse result = command.execute(request);
-                if (isTextResponse(result)) {
-                    reply(message.getChatId(), message.getMessageId(), result.getMessage());
-                } else {
-                    reply(message.getChatId(), message.getMessageId(), result.getMessage(), result.getMediaUrl());
+                try {
+                    final CommandResponse result = command.execute(request);
+                    if (isTextResponse(result)) {
+                        reply(message.getChatId(), message.getMessageId(), result.getMessage());
+                    } else {
+                        reply(message.getChatId(), message.getMessageId(), result.getMessage(), result.getMediaUrl());
+                    }
+                } catch (Exception e) {
+                    log.error("Error executing command {} {}", request.getCommand(), request.getArgument());
+                    log.error(e.getMessage(), e);
+                    reply(message.getChatId(), message.getMessageId(), "<code>Error</code>");
                 }
             } else {
                 log.info("Command not found: {}", messageText);
