@@ -12,11 +12,11 @@ import java.util.List;
 @Service
 public class XboxTitleHistoryRepositoryExtensionImpl implements XboxTitleHistoryRepositoryExtension {
 
-    private static final String LEADERBOARD_SQL = "SELECT p.gamertag AS gamertag, sum(th.current_gamescore) AS score " +
+    private static final String LEADERBOARD_SQL = "SELECT p.tg_username AS gamertag, sum(th.current_gamescore) AS score " +
             "FROM title_history th " +
             "    JOIN profile p ON th.xuid = p.xuid " +
             "WHERE th.total_gamescore != 0 AND th.current_gamescore !=0 " +
-            "GROUP BY p.gamertag " +
+            "GROUP BY gamertag " +
             "ORDER BY score desc";
 
     @PersistenceContext
