@@ -34,7 +34,7 @@ public class SettingsService {
 
         final String currentChatId = chatIdSetting.getValue();
 
-        if (newChatId != null && (currentChatId == null || currentChatId.isEmpty())) {
+        if ((newChatId != null && !newChatId.isEmpty()) && (currentChatId == null || currentChatId.isEmpty())) {
             log.info("Initializing bot for chat={}", newChatId);
             chatIdSetting.setValue(newChatId);
             settingsRepository.save(chatIdSetting);
