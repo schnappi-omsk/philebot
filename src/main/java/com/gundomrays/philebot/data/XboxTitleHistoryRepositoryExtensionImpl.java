@@ -16,7 +16,7 @@ public class XboxTitleHistoryRepositoryExtensionImpl implements XboxTitleHistory
             "FROM title_history th " +
             "    JOIN profile p ON th.xuid = p.xuid " +
             "WHERE th.total_gamescore != 0 AND th.current_gamescore !=0 " +
-            "GROUP BY gamertag " +
+            "GROUP BY p.tg_username " +
             "ORDER BY score desc";
 
     @PersistenceContext
