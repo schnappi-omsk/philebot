@@ -75,7 +75,7 @@ public class XboxTitleHistoryDataService {
                 continue;
             }
             final Integer completion = (int) Math.floor((double) history.getCurrentGamescore() / history.getTotalGamescore() * 100);
-            result.put(completion, gamer.getGamertag());
+            result.put(completion, gamer.getTgUsername());
         }
         return result;
     }
