@@ -15,6 +15,7 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
 import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.api.objects.stickers.Sticker;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -31,6 +32,9 @@ public class PhilBot extends TelegramLongPollingBot {
 
     @Value("${messages.congrats}")
     private String congrats;
+
+    @Value("${messages.congrats_sticker}")
+    private String congratsSticker;
 
     private Long chatId;
 
@@ -112,7 +116,12 @@ public class PhilBot extends TelegramLongPollingBot {
         } while (achievement != null);
 
         if (msg != null) {
-            reply(chatId, msg.getMessageId(), congrats);
+            final Random random = new Random();
+
+            if (random.nextInt(100) < 10) {
+                reply(chatId, msg.getMessageId(), congrats);
+                sendSticker(chatId, congratsSticker);
+            }
         }
     }
 
@@ -162,6 +171,18 @@ public class PhilBot extends TelegramLongPollingBot {
                 .build();
         try {
             return execute(sender);
+        } catch (TelegramApiException e) {
+            throw new TelegramException(e.getMessage(), e);
+        }
+    }
+
+    public void sendSticker(Long chatId, String sticker) {
+        final SendSticker sender = SendSticker.builder()
+                .chatId(chatId)
+                .sticker(new InputFile(sticker))
+                .build();
+        try {
+            execute(sender);
         } catch (TelegramApiException e) {
             throw new TelegramException(e.getMessage(), e);
         }
