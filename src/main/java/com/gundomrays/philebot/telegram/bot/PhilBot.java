@@ -16,6 +16,7 @@ import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.*;
+import org.telegram.telegrambots.meta.api.objects.stickers.Sticker;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.Random;
@@ -27,6 +28,9 @@ public class PhilBot extends TelegramLongPollingBot {
 
     @Value("${tg.botName}")
     private String botName;
+
+    @Value("${messages.congrats}")
+    private String congrats;
 
     private Long chatId;
 
@@ -81,7 +85,12 @@ public class PhilBot extends TelegramLongPollingBot {
                 reply(message.getChatId(), message.getMessageId(), "Command not found: " + messageText);
             }
         } else {
-            log.info("Message from: {}, text: {}, in the chat: {}", from.getUserName(), messageText, message.getChatId());
+            if (message.hasSticker()) {
+                Sticker sticker = message.getSticker();
+                log.info("Sticker sent by {}: {}", from.getUserName(), sticker.getFileId());
+            } else {
+                log.info("Message from: {}, text: {}, in the chat: {}", from.getUserName(), messageText, message.getChatId());
+            }
         }
     }
 
@@ -94,12 +103,17 @@ public class PhilBot extends TelegramLongPollingBot {
         }
 
         String achievement;
+        Message msg = null;
         do {
             achievement = messageQueue.takeMessage();
             if (achievement != null) {
-                sendMessage(chatId, achievement);
+                msg = sendMessage(chatId, achievement);
             }
         } while (achievement != null);
+
+        if (msg != null) {
+            reply(chatId, msg.getMessageId(), congrats);
+        }
     }
 
     @Scheduled(fixedDelay = 1L, timeUnit = TimeUnit.HOURS)
@@ -139,7 +153,7 @@ public class PhilBot extends TelegramLongPollingBot {
         }
     }
 
-    public void sendMessage(Long chatId, String text) {
+    public Message sendMessage(Long chatId, String text) {
         final SendMessage sender = SendMessage.builder()
                 .parseMode(ParseMode.HTML)
                 .disableWebPagePreview(false)
@@ -147,7 +161,7 @@ public class PhilBot extends TelegramLongPollingBot {
                 .text(text)
                 .build();
         try {
-            execute(sender);
+            return execute(sender);
         } catch (TelegramApiException e) {
             throw new TelegramException(e.getMessage(), e);
         }

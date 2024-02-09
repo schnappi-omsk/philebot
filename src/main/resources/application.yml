@@ -27,3 +27,4 @@ spring:
       ddl-auto: none
 messages:
   periodical: Мда, Руслан, конечно, не шарит...
+  congrats: Разъебывает
