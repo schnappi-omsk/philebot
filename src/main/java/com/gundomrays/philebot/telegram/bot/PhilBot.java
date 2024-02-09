@@ -91,7 +91,7 @@ public class PhilBot extends TelegramLongPollingBot {
         } else {
             if (message.hasSticker()) {
                 Sticker sticker = message.getSticker();
-                log.info("Sticker sent by {}: {}", from.getUserName(), sticker.getFileId());
+                log.info("Sticker sent by {}: id: {}, unique id: {}", from.getUserName(), sticker.getFileId(), sticker.getFileUniqueId());
             } else {
                 log.info("Message from: {}, text: {}, in the chat: {}", from.getUserName(), messageText, message.getChatId());
             }
