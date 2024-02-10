@@ -36,6 +36,9 @@ public class PhilBot extends TelegramLongPollingBot {
     @Value("${messages.congrats_sticker}")
     private String congratsSticker;
 
+    @Value("${messages.congrats_emoji}")
+    private String congratsEmoji;
+
     private Long chatId;
 
     @Autowired
@@ -102,7 +105,7 @@ public class PhilBot extends TelegramLongPollingBot {
     @Scheduled(fixedDelay = 30L, timeUnit = TimeUnit.SECONDS)
     public void retrieveAndSendAchievements() {
         if (chatId == null || chatId == 0) {
-            log.warn("Bot needes to be initialized for the chat!");
+            log.warn("Bot needs to be initialized for the chat!");
             return;
         }
 
@@ -120,7 +123,7 @@ public class PhilBot extends TelegramLongPollingBot {
 
             if (random.nextInt(100) < 10) {
                 reply(chatId, msg.getMessageId(), congrats);
-                sendSticker(chatId, congratsSticker);
+                sendSticker(chatId, congratsSticker, congratsEmoji);
             }
         }
     }
@@ -128,7 +131,7 @@ public class PhilBot extends TelegramLongPollingBot {
     @Scheduled(fixedDelay = 1L, timeUnit = TimeUnit.HOURS)
     public void sendPeriodicalMessage() {
         final Random random = new Random();
-        if (random.nextInt(100) < 3) {
+        if (chatId != null && random.nextInt(100) < 3) {
             sendMessage(chatId, periodicalMessageService.message());
         }
     }
@@ -176,10 +179,11 @@ public class PhilBot extends TelegramLongPollingBot {
         }
     }
 
-    public void sendSticker(Long chatId, String sticker) {
+    public void sendSticker(Long chatId, String sticker, String emoji) {
         final SendSticker sender = SendSticker.builder()
                 .chatId(chatId)
                 .sticker(new InputFile(sticker))
+                .emoji(emoji)
                 .build();
         try {
             execute(sender);

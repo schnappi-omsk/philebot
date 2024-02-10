@@ -42,7 +42,9 @@ public class SettingsService {
             log.warn("Cannot update chatId. Bot is already in chat {}", currentChatId);
         }
 
-        return chatIdSetting.getValue() == null ? null : Long.parseLong(chatIdSetting.getValue());
+        return chatIdSetting.getValue() == null || chatIdSetting.getValue().isEmpty()
+                ? null
+                : Long.parseLong(chatIdSetting.getValue());
     }
 
 }

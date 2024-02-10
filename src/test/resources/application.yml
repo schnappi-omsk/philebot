@@ -30,4 +30,5 @@ server:
 messages:
   periodical: Мда, Руслан, конечно, не шарит...
   congrats: Разъебывает
-  congrats_sticker: CAACAgIAAxkBAAIJpWXGehVGakA1ot9wv8rQnqQdBRU_AALBFwACHU0RSqnL247zYc3lNAQ
+  congrats_sticker: CAACAgIAAxkBAAMGZce_ogbN5DbsntxkIyOJ3RTKFZ8AAsEXAAIdTRFKqcvbjvNhzeU0BA
+  congrats_emoji: 😐
