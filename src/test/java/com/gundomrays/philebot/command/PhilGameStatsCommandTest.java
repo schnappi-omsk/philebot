@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -40,8 +41,9 @@ public class PhilGameStatsCommandTest {
         title.setName(argument);
         title.setTitleImg("testImg");
 
-        Map<Integer, String> titleStats = new HashMap<>();
-        titleStats.put(1, "testPlayer");
+        Map<String, Integer> titleStats = new HashMap<>();
+        titleStats.put("testPlayer", 1);
+        titleStats.put("testPlayer2", 10);
 
         // Mock behaviours
         when(xboxTitleService.findTitle(any())).thenReturn(title);
@@ -52,9 +54,12 @@ public class PhilGameStatsCommandTest {
 
         // Verification
         assertNotNull(response);
-        assertEquals("<strong>" + argument + "</strong>\n\n<code>" + "testPlayer" +
-                PhilCommandUtils.additionalSpaces("testPlayer", "testPlayer".length()) +
-                "\t:\t\t\t" + "1" + "%" + "</code>".trim(), response.getMessage().trim());
+        assertEquals("<strong>" + argument + "</strong>\n\n<code>" + "testPlayer2"
+                + PhilCommandUtils.additionalSpaces("testPlayer2", "testPlayer2".length())
+                + "\t:\t\t\t" + "10%" + "</code>\n" +
+                "<code>testPlayer"
+                + PhilCommandUtils.additionalSpaces("testPlayer", "testPlayer2".length())
+                + "\t:\t\t\t" + "1%</code>".trim(), response.getMessage().trim());
         assertEquals("testImg", response.getMediaUrl());
     }
 }

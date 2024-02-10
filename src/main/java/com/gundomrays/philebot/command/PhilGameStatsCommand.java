@@ -38,23 +38,23 @@ public class PhilGameStatsCommand implements PhilCommand {
 
         log.info("Go for leaderboard for game: {}", title.getName());
 
-        Map<Integer, String> titleStatistics = xboxTitleHistoryDataService.getTitleStatistics(title);
+        Map<String, Integer> titleStatistics = xboxTitleHistoryDataService.getTitleStatistics(title);
         log.info("{} gamers played {}", titleStatistics.size(), title.getName());
 
         return PhilCommandUtils.captionedPhotoResponse(
                 generateStatsMessage(title.getName(), titleStatistics), title.getTitleImg());
     }
 
-    private String generateStatsMessage(String titleName, Map<Integer, String> titleStats) {
+    private String generateStatsMessage(String titleName, Map<String, Integer> titleStats) {
         final StringBuilder builder = new StringBuilder();
         builder.append("<strong>").append(titleName).append("</strong>\n\n");
 
-        final int longestPlayerNameLength = titleStats.values().stream()
+        final int longestPlayerNameLength = titleStats.keySet().stream()
                 .mapToInt(String::length)
                 .max()
                 .orElse(0);
 
-        titleStats.forEach((rate, player) -> builder.append("<code>")
+        titleStats.forEach((player, rate) -> builder.append("<code>")
                 .append(player)
                 .append(PhilCommandUtils.additionalSpaces(player, longestPlayerNameLength))
                 .append("\t:\t\t\t")

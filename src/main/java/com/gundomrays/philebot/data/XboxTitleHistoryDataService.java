@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class XboxTitleHistoryDataService {
@@ -64,9 +65,9 @@ public class XboxTitleHistoryDataService {
         xboxTitleHistoryRepository.save(titleHistory);
     }
 
-    public Map<Integer, String> getTitleStatistics(final Title title) {
+    public Map<String, Integer> getTitleStatistics(final Title title) {
         Iterable<TitleHistory> gameStats = xboxTitleHistoryRepository.findAllByTitleOrderByCurrentGamescoreDesc(title);
-        final Map<Integer, String> result = new TreeMap<>(Comparator.reverseOrder());
+        final Map<String, Integer> result = new TreeMap<>(Comparator.reverseOrder());
         for (TitleHistory history : gameStats) {
             final Profile gamer = xboxProfileRepository.findById(history.getXuid()).orElse(null);
             if (gamer == null) {
@@ -75,9 +76,11 @@ public class XboxTitleHistoryDataService {
                 continue;
             }
             final Integer completion = (int) Math.floor((double) history.getCurrentGamescore() / history.getTotalGamescore() * 100);
-            result.put(completion, gamer.getTgUsername());
+            result.put(gamer.getTgUsername(), completion);
         }
-        return result;
+        return result.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
     }
 
     private TitleHistory storeTitleHistory(final Profile profile, final Title title) {
