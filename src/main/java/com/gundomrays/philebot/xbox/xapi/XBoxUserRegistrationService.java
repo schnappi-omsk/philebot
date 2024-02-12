@@ -10,12 +10,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.StreamSupport;
 
 @Service
 public class XBoxUserRegistrationService {
@@ -92,6 +94,10 @@ public class XBoxUserRegistrationService {
 
     public Profile retrieveUserProfileByTg(final String tgUsername) {
         return xboxProfileRepository.findByTgUsername(tgUsername).orElse(null);
+    }
+
+    public List<Profile> registeredUsers() {
+        return StreamSupport.stream(xboxProfileRepository.findAll().spliterator(), false).toList();
     }
 
     public Profile retrieveUserProfile(final String xuid) {

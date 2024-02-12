@@ -28,7 +28,7 @@ server:
   servlet:
     context-path: /
 messages:
-  periodical: Мда, Руслан, конечно, не шарит...
+  periodical: Мда, %s, конечно, не шарит...
   congrats: Разъебывает
   congrats_sticker: CAACAgIAAxkBAAMGZce_ogbN5DbsntxkIyOJ3RTKFZ8AAsEXAAIdTRFKqcvbjvNhzeU0BA
   congrats_emoji: 😐

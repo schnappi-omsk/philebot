@@ -131,7 +131,7 @@ public class PhilBot extends TelegramLongPollingBot {
     @Scheduled(fixedDelay = 1L, timeUnit = TimeUnit.HOURS)
     public void sendPeriodicalMessage() {
         final Random random = new Random();
-        if (chatId != null && random.nextInt(100) < 3) {
+        if (chatId != null && random.nextInt(100) < 15) {
             sendMessage(chatId, periodicalMessageService.message());
         }
     }
