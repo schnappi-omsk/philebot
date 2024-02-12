@@ -7,7 +7,7 @@ In order to use an app you'll need a XAPI token and a Telegram Bot API token.
 
 1. The bot is built using the TelegramLongPollingBot framework.
 2. It sends scheduled periodic messages and retrieves achievements at fixed delays.
-3. It has built-in command response functionalities.\
+3. It has built-in command response functionalities.
 4. Bot uses PostgreSQL
 
 ## Environment Variables
