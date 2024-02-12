@@ -9,4 +9,6 @@ import java.util.Optional;
 @Repository
 public interface XboxProfileRepository extends CrudRepository<Profile, String> {
     Optional<Profile> findByGamertag(String gamertag);
+
+    Optional<Profile> findByTgUsername(String tgUsername);
 }

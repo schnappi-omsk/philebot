@@ -1,27 +1,26 @@
 package com.gundomrays.philebot.xbox.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.redis.core.RedisHash;
-import org.springframework.data.redis.core.index.Indexed;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@RedisHash("XboxActivityItem")
+@Entity
 public class ActivityItem implements Comparable<ActivityItem> {
 
     @Id
-    @Indexed
     private String userXuid;
 
-    @Indexed
+    @Id
+    private Integer activityId;
+
     private String contentTitle;
 
-    @Indexed
     private String titleId;
 
     private String achievementName;

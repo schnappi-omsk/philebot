@@ -1,25 +1,36 @@
 package com.gundomrays.philebot.xbox.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
-import org.springframework.data.redis.core.RedisHash;
-import org.springframework.data.redis.core.index.Indexed;
+
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@RedisHash("XboxProfile")
+@Entity
 public class Profile {
 
     @NonNull
-    @Indexed
+    @Id
+    @Column(name = "xuid")
     private String id;
 
-    @Indexed
     private String gamertag;
 
-    private LocalDateTime lastAchievement = LocalDateTime.MIN;
+    @NonNull
+    private String tgUsername;
+
+    @NonNull
+    private Long tgId;
+
+    private boolean ping;
+
+    // LocalDateTime.MIN is not supported by PostgreSQL
+    private LocalDateTime lastAchievement = LocalDateTime.now();
 
 }

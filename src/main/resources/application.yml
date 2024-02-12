@@ -1,12 +1,32 @@
 xapi:
   baseUrl: https://xapi.us/api
-  apiToken: ${API_TOKEN}
+  apiToken: Bearer ${API_TOKEN}
 tg:
   baseUrl: https://api.telegram.org/bot
   apiToken: ${TGAPI_TOKEN}
   botName: Phil E-Bot
+  systemCaller: Phil Spencer
+  systemArg: Power your dreams
 ebot:
+  serviceHost: ${SERVICE_HOST}
   limitPerUser: 5
-redis:
-  host: ${REDIS_HOST}
-  port: ${REDIS_PORT}
+  requestsPerMin: 10.0
+server:
+  servlet:
+    context-path: /
+spring:
+  datasource:
+    url: jdbc:postgresql://${PG_HOST}:${PG_PORT}/${PG_DB}
+    username: ${PG_USER}
+    password: ${PG_PASS}
+  flyway:
+    baseline-on-migrate: true
+    baseline-version: 8
+  jpa:
+    hibernate:
+      ddl-auto: none
+messages:
+  periodical: Мда, %s, конечно, не шарит...
+  congrats: Разъебывает
+  congrats_sticker: CAACAgIAAxkBAAMGZce_ogbN5DbsntxkIyOJ3RTKFZ8AAsEXAAIdTRFKqcvbjvNhzeU0BA
+  congrats_emoji: 😐

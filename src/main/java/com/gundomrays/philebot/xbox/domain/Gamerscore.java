@@ -5,8 +5,9 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class TitleProgress {
+public class Gamerscore {
 
-    private Integer progressPercentage;
+    private String gamertag;
+    private Long score;
 
 }

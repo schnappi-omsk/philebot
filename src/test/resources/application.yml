@@ -1,6 +1,16 @@
 spring:
   main:
     allow-bean-definition-overriding: true
+  jpa:
+    hibernate:
+      ddl-auto: none
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+    username: pgUser
+    password: pgPass
+  flyway:
+    baseline-on-migrate: false
+    baseline-version: 1
 xapi:
   baseUrl: https://localhost
   apiToken: 123456
@@ -8,8 +18,17 @@ tg:
   baseUrl: https://localhost
   apiToken: 123456
   botName: Phil E-Bot
+  systemCaller: Phil Spencer
+  systemArg: Power your dreams
 ebot:
+  serviceHost: testHost
   limitPerUser: 5
-redis:
-  host: localhost
-  port: 6379
+  requestsPerMin: 10.0
+server:
+  servlet:
+    context-path: /
+messages:
+  periodical: Мда, %s, конечно, не шарит...
+  congrats: Разъебывает
+  congrats_sticker: CAACAgIAAxkBAAMGZce_ogbN5DbsntxkIyOJ3RTKFZ8AAsEXAAIdTRFKqcvbjvNhzeU0BA
+  congrats_emoji: 😐

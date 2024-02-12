@@ -6,7 +6,12 @@ plugins {
 
 group = 'com.gundomrays'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '19'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(20)
+    }
+}
 
 configurations {
     compileOnly {
@@ -19,14 +24,41 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    //Data dependencies
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+    implementation 'org.hibernate.validator:hibernate-validator:7.0.1.Final'
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.postgresql:postgresql:42.5.1'
+
+    //Web dependencies
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
-    implementation 'org.telegram:telegrambots:6.5.0'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+    //Telegram API
+    implementation 'org.telegram:telegrambots:6.9.7.0'
+
+    //Organizing queries to meet XAPI limitations
+    implementation 'com.google.guava:guava:33.0.0-jre'
+
+    //Sugar
     compileOnly 'org.projectlombok:lombok'
+
     annotationProcessor 'org.projectlombok:lombok'
+
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'
+    testImplementation 'com.h2database:h2'
+}
+
+jar {
+    enabled = false
+}
+
+bootJar {
+    mainClass = 'com.gundomrays.philebot.PhilEbotApplication'
+    archiveFileName = "${project.name}.jar"
 }
 
 tasks.named('test') {
