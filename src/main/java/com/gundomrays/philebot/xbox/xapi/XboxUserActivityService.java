@@ -61,8 +61,6 @@ public class XboxUserActivityService {
     @Scheduled(fixedDelay = 5L, timeUnit = TimeUnit.MINUTES)
     public void allPlayersLatestAchievements() {
         Iterable<Profile> players = xboxProfileRepository.findAll();
-        log.info("Start taking achievements from XAPI");
-        final Long startTime = System.currentTimeMillis();
 
         for (Profile player : players) {
             executor.submit(() -> {
@@ -83,8 +81,6 @@ public class XboxUserActivityService {
                 }
             });
         }
-        final Long endTime = System.currentTimeMillis();
-        log.info("End taking achievements from XAPI, spent {} ms.", endTime - startTime);
     }
 
     public Activity playerActivity(final Profile xboxProfile) {
