@@ -30,7 +30,8 @@ public class Profile {
 
     private boolean ping;
 
-    // LocalDateTime.MIN is not supported by PostgreSQL
+    private boolean active;
+
     private LocalDateTime lastAchievement = LocalDateTime.now();
 
 }

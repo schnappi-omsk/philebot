@@ -1,6 +1,7 @@
 package com.gundomrays.philebot.worker;
 
 import com.gundomrays.philebot.messaging.MessageQueue;
+import com.gundomrays.philebot.telegram.util.TelegramChatUtils;
 import com.gundomrays.philebot.xbox.domain.ActivityItem;
 import com.gundomrays.philebot.xbox.domain.Profile;
 import com.gundomrays.philebot.xbox.xapi.XBoxUserRegistrationService;
@@ -63,9 +64,9 @@ public class PhilAchievementRetriever {
 
     private String achievementText(final Profile gamer, Long tgId, final ActivityItem item) {
         final String userPingLink = gamer.isPing()
-                ? wrapLink(makePingUrl(String.valueOf(tgId)), "@" + gamer.getTgUsername())
+                ? TelegramChatUtils.wrapLink(TelegramChatUtils.makePingUrl(String.valueOf(tgId)), "@" + gamer.getTgUsername())
                 : String.format("<code>%s</code>", gamer.getTgUsername());
-        final String text = userPingLink + " — " + wrapLink(achievementUrl(item), item.getContentTitle());
+        final String text = userPingLink + " — " + TelegramChatUtils.wrapLink(achievementUrl(item), item.getContentTitle());
         log.info(text);
         return text;
     }
@@ -82,13 +83,4 @@ public class PhilAchievementRetriever {
                 UUID.randomUUID()
         );
     }
-
-    private String makePingUrl(final String username) {
-        return String.format("tg://user?id=%s", username);
-    }
-
-    private String wrapLink(final String url, final String text) {
-        return String.format("<a href='%s'>%s</a>", url, text);
-    }
-
 }

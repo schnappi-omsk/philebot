@@ -1,0 +1,1 @@
+ALTER TABLE profile ADD COLUMN active BOOLEAN DEFAULT true;

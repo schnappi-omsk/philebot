@@ -1,10 +1,10 @@
 package com.gundomrays.philebot.telegram.bot;
 
+import com.gundomrays.philebot.telegram.util.TelegramChatUtils;
 import com.gundomrays.philebot.xbox.domain.Profile;
 import com.gundomrays.philebot.xbox.xapi.XBoxUserRegistrationService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.api.objects.Chat;
 
 import java.util.List;
 import java.util.Random;
@@ -31,15 +31,8 @@ public class PeriodicalMessageService {
         final Random random = new Random();
         final Profile user = users.get(random.nextInt(users.size()));
 
-        return String.format(message, wrapLink(makePingUrl(String.valueOf(user.getTgId())), "@" + user.getTgUsername()));
+        String userPingUrl = TelegramChatUtils.makePingUrl(String.valueOf(user.getTgId()));
+        String userLink = TelegramChatUtils.wrapLink(userPingUrl, "@" + user.getTgUsername());
+        return String.format(message, userLink);
     }
-
-    private String makePingUrl(final String username) {
-        return String.format("tg://user?id=%s", username);
-    }
-
-    private String wrapLink(final String url, final String text) {
-        return String.format("<a href='%s'>%s</a>", url, text);
-    }
-
 }

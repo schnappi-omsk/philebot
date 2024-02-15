@@ -100,8 +100,32 @@ public class XBoxUserRegistrationService {
         return StreamSupport.stream(xboxProfileRepository.findAll().spliterator(), false).toList();
     }
 
+    public void deactivateUser(final Profile profile) {
+        if (userExists(profile)) {
+            profile.setActive(false);
+            xboxProfileRepository.save(profile);
+            log.warn("User {} was deactivated", profile.getTgUsername());
+        } else {
+            log.warn("User {}:{} is not registered!", profile.getId(), profile.getTgUsername());
+        }
+    }
+
+    public void activateUser(final Profile profile) {
+        if (userExists(profile)) {
+            profile.setActive(true);
+            xboxProfileRepository.save(profile);
+            log.warn("User {} was activated", profile.getTgUsername());
+        } else {
+            log.warn("User {}:{} is not registered!", profile.getId(), profile.getTgUsername());
+        }
+    }
+
     public Profile retrieveUserProfile(final String xuid) {
         return xboxProfileRepository.findById(xuid).orElse(null);
+    }
+
+    private boolean userExists(final Profile profile) {
+        return xboxProfileRepository.existsById(profile.getId());
     }
 
     private void fillProfileHistory(final Profile profile) {
