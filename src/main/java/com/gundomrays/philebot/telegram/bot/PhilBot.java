@@ -4,6 +4,7 @@ import com.gundomrays.philebot.command.*;
 import com.gundomrays.philebot.messaging.MessageQueue;
 import com.gundomrays.philebot.telegram.config.SettingsService;
 import com.gundomrays.philebot.telegram.exception.TelegramException;
+import com.gundomrays.philebot.xbox.domain.Profile;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,13 +14,17 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
+import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
 import org.telegram.telegrambots.meta.api.objects.*;
+import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
 import org.telegram.telegrambots.meta.api.objects.stickers.Sticker;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 
+import java.util.Collection;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -52,6 +57,9 @@ public class PhilBot extends TelegramLongPollingBot {
 
     @Autowired
     private SettingsService settingsService;
+
+    @Autowired
+    private UserActivityService userActivityService;
 
     public PhilBot(String botToken) {
         super(botToken);
@@ -133,6 +141,36 @@ public class PhilBot extends TelegramLongPollingBot {
         final Random random = new Random();
         if (chatId != null && random.nextInt(100) < 15) {
             sendMessage(chatId, periodicalMessageService.message());
+        }
+    }
+
+    @Scheduled(fixedDelay = 1L, timeUnit = TimeUnit.MINUTES)
+    public void updateActiveUsers() {
+        Collection<Profile> registeredUsers = userActivityService.registeredUsers();
+
+        for (Profile user : registeredUsers) {
+            if (user.isActive() && !presentsInChat(user.getTgId(), chatId)) {
+                userActivityService.deactivateUser(user);
+                sendMessage(chatId, userActivityService.deactivationMessage(user));
+            } else if (!user.isActive() && presentsInChat(user.getTgId(), chatId)) {
+                userActivityService.activateUser(user);
+                sendMessage(chatId, userActivityService.activationMessage(user));
+            }
+        }
+    }
+
+    public boolean presentsInChat(final Long userId, final Long chatId) {
+        final GetChatMember chatMemberGetter = GetChatMember.builder()
+                .chatId(chatId)
+                .userId(userId)
+                .build();
+        try {
+            final ChatMember chatMember = execute(chatMemberGetter);
+            return chatMember != null
+                    && !"left".equalsIgnoreCase(chatMember.getStatus())
+                    && !"kicked".equalsIgnoreCase(chatMember.getStatus());
+        } catch (TelegramApiException e) {
+            throw new TelegramException(e.getMessage(), e);
         }
     }
 
