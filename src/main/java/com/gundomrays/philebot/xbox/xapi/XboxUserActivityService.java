@@ -24,6 +24,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.StreamSupport;
 
 @Service
 public class XboxUserActivityService {
@@ -63,23 +64,27 @@ public class XboxUserActivityService {
         Iterable<Profile> players = xboxProfileRepository.findAll();
 
         for (Profile player : players) {
-            executor.submit(() -> {
-                log.info("Retrieving activity of: {}", player.getGamertag());
-                final LocalDateTime lastAchievement = player.getLastAchievement();
-                final Callable<Activity> activityTask = () -> playerActivity(player);
-                CompletableFuture<Activity> activityFuture = rateLimitedExecutor.submit(2, activityTask);
-                try {
-                    Activity playerActivity = activityFuture.get();
-                    playerActivity.getActivityItems().stream()
-                            .filter(item -> item.getDate().isAfter(lastAchievement))
-                            .sorted(Comparator.reverseOrder())
-                            .limit(limitPerUser)
-                            .forEach(achievementQueue::placeAchievement);
-                } catch (InterruptedException | ExecutionException e) {
-                    log.error("Cannot retrieve player activity: " + player.getGamertag(), e);
-                    throw new RuntimeException("Cannot retrieve player activity: " + player.getGamertag(), e);
-                }
-            });
+            if (player.isActive()) {
+                executor.submit(() -> {
+                    log.info("Retrieving activity of: {}", player.getGamertag());
+                    final LocalDateTime lastAchievement = player.getLastAchievement();
+                    final Callable<Activity> activityTask = () -> playerActivity(player);
+                    CompletableFuture<Activity> activityFuture = rateLimitedExecutor.submit(2, activityTask);
+                    try {
+                        Activity playerActivity = activityFuture.get();
+                        playerActivity.getActivityItems().stream()
+                                .filter(item -> item.getDate().isAfter(lastAchievement))
+                                .sorted(Comparator.reverseOrder())
+                                .limit(limitPerUser)
+                                .forEach(achievementQueue::placeAchievement);
+                    } catch (InterruptedException | ExecutionException e) {
+                        log.error("Cannot retrieve player activity: " + player.getGamertag(), e);
+                        throw new RuntimeException("Cannot retrieve player activity: " + player.getGamertag(), e);
+                    }
+                });
+            } else {
+                log.info("Skipping {} - not active", player.getGamertag());
+            }
         }
     }
 
