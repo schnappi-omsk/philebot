@@ -26,7 +26,9 @@ spring:
     hibernate:
       ddl-auto: none
 messages:
-  periodical: Мда, %s, конечно, не шарит...
+  periodical:
+    text: Мда, %s, конечно, не шарит...
+    probability: 5
   congrats: Разъебывает
   congrats_sticker: CAACAgIAAxkBAAMGZce_ogbN5DbsntxkIyOJ3RTKFZ8AAsEXAAIdTRFKqcvbjvNhzeU0BA
   congrats_emoji: 😐
