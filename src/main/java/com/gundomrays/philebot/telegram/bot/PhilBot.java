@@ -22,7 +22,6 @@ import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
 import org.telegram.telegrambots.meta.api.objects.stickers.Sticker;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 
 import java.util.Collection;
 import java.util.Random;
@@ -139,7 +138,7 @@ public class PhilBot extends TelegramLongPollingBot {
     @Scheduled(fixedDelay = 1L, timeUnit = TimeUnit.HOURS)
     public void sendPeriodicalMessage() {
         final Random random = new Random();
-        if (chatId != null && random.nextInt(100) < 15) {
+        if (chatId != null && random.nextInt(100) < periodicalMessageService.probability()) {
             sendMessage(chatId, periodicalMessageService.message());
         }
     }

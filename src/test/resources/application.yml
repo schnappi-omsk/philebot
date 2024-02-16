@@ -28,7 +28,11 @@ server:
   servlet:
     context-path: /
 messages:
-  periodical: Мда, %s, конечно, не шарит...
+  periodical:
+    text: Мда, %s, конечно, не шарит...
+    probability: 5
   congrats: Разъебывает
   congrats_sticker: CAACAgIAAxkBAAMGZce_ogbN5DbsntxkIyOJ3RTKFZ8AAsEXAAIdTRFKqcvbjvNhzeU0BA
   congrats_emoji: 😐
+  deactivate: Пиздец, %s ливнул из чата, нахуя нам его ачивки? Выключим пока...
+  activate: С возвращением, %s! Включил вывод твоих ачивок, с тебя $20.
