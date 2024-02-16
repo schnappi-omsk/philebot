@@ -12,8 +12,11 @@ import java.util.Random;
 @Service
 public class PeriodicalMessageService {
 
-    @Value("${messages.periodical}")
+    @Value("${messages.periodical.text}")
     private String message;
+
+    @Value("${messages.periodical.probability}")
+    private Integer probability;
 
     private final XBoxUserRegistrationService xBoxUserRegistrationService;
 
@@ -35,4 +38,9 @@ public class PeriodicalMessageService {
         String userLink = TelegramChatUtils.wrapLink(userPingUrl, "@" + user.getTgUsername());
         return String.format(message, userLink);
     }
+
+    public Integer probability() {
+        return probability;
+    }
+
 }
