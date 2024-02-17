@@ -21,7 +21,7 @@ spring:
     password: ${PG_PASS}
   flyway:
     baseline-on-migrate: true
-    baseline-version: 9
+    baseline-version: 11
   jpa:
     hibernate:
       ddl-auto: none

@@ -17,4 +17,6 @@ public class Settings {
 
     private String value;
 
+    private boolean sealed;
+
 }
