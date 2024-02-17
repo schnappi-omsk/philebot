@@ -1,0 +1,1 @@
+UPDATE settings SET sealed = true WHERE id = 'CHAT_ID';
