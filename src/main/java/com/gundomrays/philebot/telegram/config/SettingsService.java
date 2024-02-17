@@ -26,6 +26,11 @@ public class SettingsService {
     public Long chatId(final String newChatId) {
         Settings chatIdSetting = settingsRepository.findById(CHAT_ID).orElse(null);
 
+        if (chatIdSetting != null && chatIdSetting.isSealed()) {
+            log.info("Cannot update chatId, setting is sealed.");
+            return chatIdValueFromSettings(chatIdSetting);
+        }
+
         if (chatIdSetting == null) {
             log.warn("{} is not present, something wrong with settings!", CHAT_ID);
             chatIdSetting = new Settings();
@@ -34,16 +39,23 @@ public class SettingsService {
 
         final String currentChatId = chatIdSetting.getValue();
 
-        if ((newChatId != null && !newChatId.isEmpty()) && (currentChatId == null || currentChatId.isEmpty())) {
+        boolean validChatIds = (newChatId != null && !newChatId.isEmpty())
+                && (currentChatId == null || currentChatId.isEmpty());
+        if (validChatIds) {
             log.info("Initializing bot for chat={}", newChatId);
             chatIdSetting.setValue(newChatId);
+            chatIdSetting.setSealed(true);
             settingsRepository.save(chatIdSetting);
         } else {
             log.warn("Cannot update chatId. Bot is already in chat {}", currentChatId);
         }
 
+        return chatIdValueFromSettings(chatIdSetting);
+    }
+
+    private Long chatIdValueFromSettings(Settings chatIdSetting) {
         return chatIdSetting.getValue() == null || chatIdSetting.getValue().isEmpty()
-                ? null
+                ? 0L
                 : Long.parseLong(chatIdSetting.getValue());
     }
 
