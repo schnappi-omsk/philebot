@@ -22,6 +22,7 @@ import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
 import org.telegram.telegrambots.meta.api.objects.stickers.Sticker;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 
 import java.util.Collection;
 import java.util.Random;
@@ -168,6 +169,13 @@ public class PhilBot extends TelegramLongPollingBot {
             return chatMember != null
                     && !"left".equalsIgnoreCase(chatMember.getStatus())
                     && !"kicked".equalsIgnoreCase(chatMember.getStatus());
+        } catch (TelegramApiRequestException e) {
+            if (e.getErrorCode() == 400 && e.getMessage().toLowerCase().contains("user not found")) {
+                log.warn("Request is failed. userId={}, chatId={}. Probably user is not in chat and have privacy settings.", userId, chatId);
+                return false;
+            } else {
+                throw new TelegramException(e.getMessage(), e);
+            }
         } catch (TelegramApiException e) {
             throw new TelegramException(e.getMessage(), e);
         }
