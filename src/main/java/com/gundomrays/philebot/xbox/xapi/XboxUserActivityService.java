@@ -74,6 +74,7 @@ public class XboxUserActivityService {
                         Activity playerActivity = activityFuture.get();
                         playerActivity.getActivityItems().stream()
                                 .filter(item -> item.getDate().isAfter(lastAchievement))
+                                .distinct()
                                 .sorted(Comparator.reverseOrder())
                                 .limit(limitPerUser)
                                 .forEach(achievementQueue::placeAchievement);
