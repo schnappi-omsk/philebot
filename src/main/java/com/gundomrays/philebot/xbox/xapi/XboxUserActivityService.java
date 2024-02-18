@@ -24,7 +24,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.StreamSupport;
 
 @Service
 public class XboxUserActivityService {
@@ -74,6 +73,7 @@ public class XboxUserActivityService {
                         Activity playerActivity = activityFuture.get();
                         playerActivity.getActivityItems().stream()
                                 .filter(item -> item.getDate().isAfter(lastAchievement))
+                                .distinct()
                                 .sorted(Comparator.reverseOrder())
                                 .limit(limitPerUser)
                                 .forEach(achievementQueue::placeAchievement);

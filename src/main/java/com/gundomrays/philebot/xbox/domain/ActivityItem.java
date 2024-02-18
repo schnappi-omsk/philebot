@@ -7,6 +7,7 @@ import lombok.NonNull;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -36,5 +37,23 @@ public class ActivityItem implements Comparable<ActivityItem> {
     @Override
     public int compareTo(ActivityItem o) {
         return date.compareTo(o.date);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (!(o instanceof ActivityItem that)) {
+            return false;
+        }
+
+        return Objects.equals(titleId, that.titleId) &&
+                Objects.equals(achievementName, that.achievementName) &&
+                Objects.equals(achievementDescription, that.achievementDescription);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(titleId, achievementName, achievementDescription);
     }
 }
