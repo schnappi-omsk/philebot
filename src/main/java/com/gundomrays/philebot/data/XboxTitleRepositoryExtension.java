@@ -9,4 +9,6 @@ public interface XboxTitleRepositoryExtension {
     Collection<Title> searchTitlesByName(String name);
 
     Optional<Title> findLastPlayedTitle();
+
+    Collection<String> firstTitleLetters();
 }

@@ -22,6 +22,9 @@ public class XboxTitleRepositoryExtensionImpl implements XboxTitleRepositoryExte
             "ORDER BY th.last_updated DESC " +
             "LIMIT 1";
 
+    private static final String STORED_ALPHABET = "SELECT DISTINCT SUBSTRING(t.name FROM 1 FOR 1) AS letter " +
+            "FROM title t " +
+            "ORDER BY letter";
 
     @PersistenceContext
     private final EntityManager entityManager;
@@ -47,6 +50,12 @@ public class XboxTitleRepositoryExtensionImpl implements XboxTitleRepositoryExte
     public Optional<Title> findLastPlayedTitle() {
         final Query lastTitleQuery = entityManager.createNativeQuery(LAST_TITLE, Title.class);
         return Optional.ofNullable((Title) lastTitleQuery.getSingleResult());
+    }
+
+    @Override
+    public Collection<String> firstTitleLetters() {
+        final Query alphabetQuery = entityManager.createNativeQuery(STORED_ALPHABET, String.class);
+        return alphabetQuery.getResultList();
     }
 
     private String generateCondition(final String[] names) {

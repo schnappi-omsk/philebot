@@ -1,5 +1,7 @@
 package com.gundomrays.philebot.web;
 
+import com.gundomrays.philebot.web.xbox.XboxTitleUIService;
+import com.gundomrays.philebot.xbox.domain.Title;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,6 +15,13 @@ import java.nio.charset.StandardCharsets;
 @Controller
 @RequestMapping("/")
 public class AchievementController {
+
+    private final XboxTitleUIService xboxTitleUIService;
+
+    public AchievementController(XboxTitleUIService xboxTitleUIService) {
+        this.xboxTitleUIService = xboxTitleUIService;
+    }
+
     @RequestMapping(value = "/xbox/{achievement}/{description}/{pts}/{rarity}", method = RequestMethod.GET)
     public String achievementPage(
             @PathVariable("achievement") String achievement,
@@ -32,6 +41,17 @@ public class AchievementController {
         model.addAttribute("seed", seed);
 
         return "achievement";
+    }
+
+    @RequestMapping(value = "/xbox/game/{titleId}", method = RequestMethod.GET)
+    public String gameStats(@PathVariable("titleId") String titleId, Model model) {
+        final Title title = xboxTitleUIService.title(titleId);
+
+        model.addAttribute("alphabet", xboxTitleUIService.alphabet());
+        model.addAttribute("title", title);
+        model.addAttribute("statistics", xboxTitleUIService.stats(title));
+
+        return "game_stats";
     }
 
     @RequestMapping("/")

@@ -30,6 +30,10 @@ public class XboxTitleDataService {
         return xboxTitleRepository.findByTitleId(id).orElse(null);
     }
 
+    public Collection<String> titleAlphabet() {
+        return xboxTitleRepository.firstTitleLetters();
+    }
+
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public Title saveTitle(final String titleId, final String titleName) {
         return storeTitle(titleId, titleName);
