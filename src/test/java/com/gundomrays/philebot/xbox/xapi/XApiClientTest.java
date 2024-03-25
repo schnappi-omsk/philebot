@@ -1,6 +1,5 @@
 package com.gundomrays.philebot.xbox.xapi;
 
-import com.gundomrays.philebot.xbox.domain.Activity;
 import com.gundomrays.philebot.xbox.domain.Profile;
 import com.gundomrays.philebot.xbox.domain.TitleHistory;
 import org.junit.jupiter.api.Test;
@@ -9,14 +8,11 @@ import org.springframework.web.util.UriBuilder;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.Objects;
 import java.util.function.Function;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -50,18 +46,6 @@ public class XApiClientTest {
         TitleHistory titleHistory = xApiClient.titleHistory("12456");
 
         StepVerifier.create(Mono.just(titleHistory))
-                .expectSubscription()
-                .expectNextMatches(Objects::nonNull)
-                .verifyComplete();
-    }
-
-    @Test
-    void userActivity() throws Exception {
-        XApiClient xApiClient = xapiClientMock(Activity.class);
-
-        Activity activity = xApiClient.userActivity("123456");
-
-        StepVerifier.create(Mono.just(activity))
                 .expectSubscription()
                 .expectNextMatches(Objects::nonNull)
                 .verifyComplete();

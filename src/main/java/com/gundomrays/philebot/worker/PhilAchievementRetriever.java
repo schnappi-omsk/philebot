@@ -2,9 +2,7 @@ package com.gundomrays.philebot.worker;
 
 import com.gundomrays.philebot.messaging.MessageQueue;
 import com.gundomrays.philebot.telegram.util.TelegramChatUtils;
-import com.gundomrays.philebot.xbox.domain.ActivityItem;
-import com.gundomrays.philebot.xbox.domain.Profile;
-import com.gundomrays.philebot.xbox.xapi.XBoxUserRegistrationService;
+import com.gundomrays.philebot.xbox.domain.*;
 import com.gundomrays.philebot.xbox.xapi.executor.AchievementQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,62 +23,69 @@ public class PhilAchievementRetriever {
 
     private static final Logger log = LoggerFactory.getLogger(PhilAchievementRetriever.class);
 
-    private final XBoxUserRegistrationService xBoxUserRegistrationService;
-
     private final AchievementQueue achievementQueue;
 
     private final MessageQueue messageQueue;
 
-    public PhilAchievementRetriever(XBoxUserRegistrationService xBoxUserRegistrationService,
-                                    AchievementQueue achievementQueue,
+    public PhilAchievementRetriever(AchievementQueue achievementQueue,
                                     MessageQueue messageQueue) {
-        this.xBoxUserRegistrationService = xBoxUserRegistrationService;
         this.achievementQueue = achievementQueue;
         this.messageQueue = messageQueue;
     }
 
     @Scheduled(fixedDelay = 1L, timeUnit = TimeUnit.MINUTES)
     public void retrieve() {
-        ActivityItem achievement;
+
+        XboxAchievement xboxAchievement;
         do {
-            achievement = achievementQueue.takeAchievement();
-            if (achievement != null) {
-                log.info("Got an achievement from the queue: {} : {} - {} ({}%) {} pts.",
-                        achievement.getContentTitle(), achievement.getAchievementName(),
-                        achievement.getAchievementDescription(), achievement.getRarityPercentage(), achievement.getGamerscore());
-
-                String xuid = achievement.getUserXuid();
-                final Profile gamer = xBoxUserRegistrationService.retrieveUserProfile(xuid);
-                if (gamer == null) {
-                    log.error("Cannot find gamer by xuid={}", xuid);
-                    achievementQueue.placeAchievement(achievement);
-                    continue;
-                }
-                messageQueue.messageToSend(achievementText(gamer, gamer.getTgId(), achievement));
+            xboxAchievement = achievementQueue.takePlayerAchievement();
+            if (xboxAchievement != null) {
+                String achievementMessage = playerAchievementText(xboxAchievement);
+                log.info("Sending achievement to chat: {}", achievementMessage);
+                messageQueue.messageToSend(achievementMessage);
             }
-
-        } while (achievement != null);
+        } while (xboxAchievement != null);
     }
 
-    private String achievementText(final Profile gamer, Long tgId, final ActivityItem item) {
+    private String playerAchievementText(final XboxAchievement achievement) {
+        Profile gamer = achievement.getProfile();
         final String userPingLink = gamer.isPing()
-                ? TelegramChatUtils.wrapLink(TelegramChatUtils.makePingUrl(String.valueOf(tgId)), "@" + gamer.getTgUsername())
+                ? TelegramChatUtils.wrapLink(TelegramChatUtils.makePingUrl(String.valueOf(gamer.getTgId())), "@" + gamer.getTgUsername())
                 : String.format("<code>%s</code>", gamer.getTgUsername());
-        final String text = userPingLink + " — " + TelegramChatUtils.wrapLink(achievementUrl(item), item.getContentTitle());
-        log.info(text);
-        return text;
+        return userPingLink + " — " + playerAchievementUrl(achievement);
     }
 
-    private String achievementUrl(final ActivityItem item) {
-        return String.format(
-                "%s/xbox/%s/%s/%d/%d?imgUrl=%s&seed=%s",
+    private String playerAchievementUrl(final XboxAchievement xboxAchievement) {
+        TitleHubAchievement achievement = xboxAchievement.getAchievement();
+        String gamerscore = achievement.getRewards()
+                .stream()
+                .filter(r -> "Gamerscore".equalsIgnoreCase(r.getType()))
+                .map(Rewards::getValue)
+                .findFirst()
+                .orElse("0");
+        String achievementIconUrl = achievement.getMediaAssets()
+                .stream()
+                .filter(ass -> "Icon".equalsIgnoreCase(ass.getType()))
+                .map(MediaAsset::getUrl)
+                .findFirst()
+                .orElse("");
+        String achievementUrl = String.format(
+                "%s/xbox/%s/%s/%d/%s?imgUrl=%s&seed=%s",
                 serviceHost,
-                URLEncoder.encode(item.getAchievementName(), StandardCharsets.UTF_8),
-                URLEncoder.encode(item.getAchievementDescription(), StandardCharsets.UTF_8),
-                item.getGamerscore(),
-                item.getRarityPercentage(),
-                URLEncoder.encode(item.getAchievementIcon(), StandardCharsets.UTF_8),
+                URLEncoder.encode(achievement.getName(), StandardCharsets.UTF_8),
+                URLEncoder.encode(achievement.getDescription(), StandardCharsets.UTF_8),
+                Integer.parseInt(gamerscore),
+                achievement.getRarity().getCurrentPercentage(),
+                URLEncoder.encode(achievementIconUrl, StandardCharsets.UTF_8),
                 UUID.randomUUID()
         );
+        String titleName = achievement.getTitleAssociations()
+                .stream()
+                .map(Title::getName)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Title is null. Weird"));
+        return TelegramChatUtils.wrapLink(achievementUrl, titleName);
     }
+
+
 }

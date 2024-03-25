@@ -18,12 +18,12 @@ public class AchievementController {
             @PathVariable("achievement") String achievement,
             @PathVariable("description") String description,
             @PathVariable("pts") Integer score,
-            @PathVariable("rarity") Integer rarity,
+            @PathVariable("rarity") String rarity,
             @RequestParam("imgUrl") String imgUrl,
             @RequestParam("seed") String seed,
             Model model
     ) {
-        final String achievementStats = String.format("%d pts., %d%%", score, rarity);
+        final String achievementStats = String.format("%d pts., %s%%", score, rarity);
 
         model.addAttribute("achievement", URLDecoder.decode(achievement, StandardCharsets.UTF_8));
         model.addAttribute("achievementInfo", URLDecoder.decode(description, StandardCharsets.UTF_8));
