@@ -1,8 +1,6 @@
 package com.gundomrays.philebot.xbox.xapi;
 
-import com.gundomrays.philebot.xbox.domain.Activity;
-import com.gundomrays.philebot.xbox.domain.Profile;
-import com.gundomrays.philebot.xbox.domain.TitleHistory;
+import com.gundomrays.philebot.xbox.domain.*;
 import com.gundomrays.philebot.xbox.xapi.exception.UnauthorizedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +8,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class XApiClient {
@@ -49,23 +52,38 @@ public class XApiClient {
         throw new RuntimeException("No title history found for xuid: " + xuid);
     }
 
-    public Activity userActivity(final String xuid) {
+    public TitleHubTitleList titleHubTitleList(final String xuid) {
         final Long startTime = System.currentTimeMillis();
 
-        final Activity activity = xapiRequest("/{xuid}/activity", xuid, Activity.class).block();
+        final  TitleHubTitleList titleHubTitleList =
+                xapiRequest("/{xuid}/titlehub-achievement-list", xuid, TitleHubTitleList.class).block();
 
         final Long endTime = System.currentTimeMillis();
-        log.info("Activity XAPI request for xuid={} took {} ms.", xuid, endTime - startTime);
+        log.info("TitleHub Title List XAPI request for xuid={} took {} ms.", xuid, endTime - startTime);
 
-        if (activity != null) {
-            log.info("Found activity for xuid={}, items count: {}", xuid, activity.getActivityItems().size());
-            return activity;
+        if (titleHubTitleList == null) {
+            throw new RuntimeException("No TitleHub achievements found for xuid: " + xuid);
         }
 
-        throw new RuntimeException("No activity found for xuid: " + xuid);
+        log.info("TitleHub Achievements response for xuid={}, titles count={}", xuid, titleHubTitleList.getTitles().size());
+        return titleHubTitleList;
     }
 
-    private <T> Mono<T> xapiRequest(final String uri, final String argument, Class<T> clazz) {
+    public TitleHubAchievements titleHubAchievements(final String xuid, final String title) {
+        final Map<String, String> argument = Map.of("xuid", xuid, "titleId", title);
+
+        final Long startTime = System.currentTimeMillis();
+
+        final TitleHubAchievements achievements
+                = xapiRequest("/{xuid}/achievements/{titleId}", argument, TitleHubAchievements.class).block();
+
+        final Long endTime = System.currentTimeMillis();
+        log.info("TitleHub Achievements XAPI request for xuid={} and title={} took {} ms.", xuid, title, endTime - startTime);
+
+        return achievements;
+    }
+
+    private <T> Mono<T> xapiRequest(final String uri, final Map<String, String> argument, Class<T> clazz) {
         return xapiRequest(uri, argument, clazz, false)
                 .onErrorResume(
                         UnauthorizedException.class,
@@ -73,7 +91,16 @@ public class XApiClient {
                 );
     }
 
-    private <T> Mono<T> xapiRequest(final String uri, final String argument, Class<T> clazz, boolean freshLogin) {
+    private <T> Mono<T> xapiRequest(final String uri, final String argument, Class<T> clazz) {
+        final Map<String, String> arg = mapFromArgument(uri, argument);
+        return xapiRequest(uri, arg, clazz, false)
+                .onErrorResume(
+                        UnauthorizedException.class,
+                        e -> xapiRequest(uri, arg, clazz, true)
+                );
+    }
+
+    private <T> Mono<T> xapiRequest(final String uri, final Map<String, String> argument, Class<T> clazz, boolean freshLogin) {
         return  webClient.get()
                 .uri(uriBuilder -> {
                     if (freshLogin) {
@@ -89,6 +116,16 @@ public class XApiClient {
                         clientResponse -> Mono.error(new UnauthorizedException("401"))
                 )
                 .bodyToMono(clazz);
+    }
+
+    private Map<String, String> mapFromArgument(final String uri, final String argument) {
+        final Pattern pattern = Pattern.compile("\\{(.*?)}");
+        final Matcher matcher = pattern.matcher(uri);
+        if (matcher.find()) {
+            return Collections.singletonMap(matcher.group(1), argument);
+        } else {
+            return Collections.emptyMap();
+        }
     }
 
 }

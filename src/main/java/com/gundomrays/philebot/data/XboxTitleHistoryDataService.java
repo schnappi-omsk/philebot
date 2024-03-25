@@ -27,8 +27,8 @@ public class XboxTitleHistoryDataService {
         this.xboxTitleDataService = xboxTitleDataService;
     }
 
-    public TitleHistory findTitleHistory(final String xuid, final ActivityItem item) {
-        Title title = xboxTitleDataService.saveTitle(item.getTitleId(), item.getContentTitle());
+    public TitleHistory findTitleHistory(final String xuid, final String titleId, final String titleName) {
+        Title title = xboxTitleDataService.saveTitle(titleId, titleName);
         return xboxTitleHistoryRepository.findByXuidAndTitle(xuid, title).orElse(null);
     }
 
@@ -47,20 +47,22 @@ public class XboxTitleHistoryDataService {
     }
 
     @Transactional
-    public void updateTitleHistory(final TitleHistory titleHistory, final ActivityItem item, final Achievement achievement) {
-        if (achievement != null) {
-            titleHistory.setCurrentGamescore(achievement.getCurrentGamerscore());
-            log.info("Current gamerscore for xuid={} was updated to {}", item.getUserXuid(), titleHistory.getCurrentGamescore());
-            if (!Objects.equals(titleHistory.getTotalGamescore(), achievement.getTotalGamerscore())) {
-                titleHistory.setTotalGamescore(achievement.getTotalGamerscore());
-                log.info("Total gamerscore for title {} was updated to {}", item.getContentTitle(), titleHistory.getTotalGamescore());
+    public void updateTitleHistory(final TitleHistory titleHistory, final TitleHubTitle title, final TitleHubAchievement achievement) {
+        final Achievement progress = title.getAchievement();
+        if (progress != null) {
+            titleHistory.setCurrentGamescore(progress.getCurrentGamerscore());
+            log.info("Current gamescore was updated to {}, xuid={}, game={}", titleHistory.getCurrentGamescore(), titleHistory.getXuid(), title.getName());
+            if (!Objects.equals(titleHistory.getTotalGamescore(), progress.getTotalGamerscore())) {
+                log.info("Total gamerscore was changed for {} (DLC released?)", titleHistory.getTitle().getName());
+                titleHistory.setTotalGamescore(progress.getTotalGamerscore());
             }
         }
 
-        if (titleHistory.getLastUpdated().isBefore(item.getDate())) {
-            titleHistory.setLastUpdated(item.getDate());
-            log.info("LastUpdated={} TitleHistory for xuid={} and title={}",
-                    item.getDate(), titleHistory.getXuid(), titleHistory.getTitle().getTitleId());
+        final Progression unlocked = achievement.getProgression();
+        boolean lastUpdatedChanged = unlocked != null && titleHistory.getLastUpdated().isBefore(unlocked.getTimeUnlocked());
+        if (lastUpdatedChanged) {
+            titleHistory.setLastUpdated(unlocked.getTimeUnlocked());
+            log.info("LastUpdated={}. xuid={}, game={}", titleHistory.getLastUpdated(), titleHistory.getXuid(), title.getName());
         }
         xboxTitleHistoryRepository.save(titleHistory);
     }
