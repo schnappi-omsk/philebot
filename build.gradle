@@ -37,7 +37,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
     //Telegram API
-    implementation 'org.telegram:telegrambots:6.9.7.0'
+    implementation 'org.telegram:telegrambots:6.9.7.1'
 
     //Organizing queries to meet XAPI limitations
     implementation 'com.google.guava:guava:33.0.0-jre'

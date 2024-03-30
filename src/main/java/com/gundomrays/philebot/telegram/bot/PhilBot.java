@@ -15,16 +15,19 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember;
+import org.telegram.telegrambots.meta.api.methods.reactions.SetMessageReaction;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
 import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
+import org.telegram.telegrambots.meta.api.objects.reactions.ReactionTypeEmoji;
 import org.telegram.telegrambots.meta.api.objects.stickers.Sticker;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -60,6 +63,9 @@ public class PhilBot extends TelegramLongPollingBot {
 
     @Autowired
     private UserActivityService userActivityService;
+
+    @Autowired
+    private ReactionService reactionService;
 
     public PhilBot(String botToken) {
         super(botToken);
@@ -106,6 +112,7 @@ public class PhilBot extends TelegramLongPollingBot {
             } else {
                 log.info("Message from: {}, text: {}, in the chat: {}", from.getUserName(), messageText, message.getChatId());
             }
+            react(message);
         }
     }
 
@@ -178,6 +185,21 @@ public class PhilBot extends TelegramLongPollingBot {
             }
         } catch (TelegramApiException e) {
             throw new TelegramException(e.getMessage(), e);
+        }
+    }
+
+    public void react(final Message message) {
+        if (reactionService.needsClownReaction(message.getText())) {
+            final SetMessageReaction reaction = SetMessageReaction.builder()
+                    .chatId(chatId)
+                    .messageId(message.getMessageId())
+                    .reactionTypes(List.of(ReactionTypeEmoji.builder().type(ReactionTypeEmoji.EMOJI_TYPE).emoji(reactionService.clown()).build()))
+                    .build();
+            try {
+                execute(reaction);
+            } catch (TelegramApiException e) {
+                throw new TelegramException(e.getMessage(), e);
+            }
         }
     }
 
