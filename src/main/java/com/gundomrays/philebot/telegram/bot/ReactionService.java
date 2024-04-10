@@ -1,5 +1,6 @@
 package com.gundomrays.philebot.telegram.bot;
 
+import com.gundomrays.philebot.telegram.bot.transform.MessageTransformer;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -19,14 +20,20 @@ public class ReactionService {
 
     private Set<String> clownTriggerWords = new HashSet<>();
 
+    private final MessageTransformer cyrillicLowerCaseTransformer;
+
+    public ReactionService(MessageTransformer cyrillicLowerCaseTransformer) {
+        this.cyrillicLowerCaseTransformer = cyrillicLowerCaseTransformer;
+    }
+
     @PostConstruct
     private void init() {
         clownTriggerWords = new HashSet<>(Arrays.asList(clownTriggers.split(",")));
     }
 
     public boolean needsClownReaction(final String messageText) {
-        return clownTriggerWords.stream()
-                .anyMatch(value -> messageText.toLowerCase().contains(value.toLowerCase()));
+        return messageText != null && clownTriggerWords.stream()
+                .anyMatch(value -> cyrillicLowerCaseTransformer.transform(messageText).toLowerCase().contains(value.toLowerCase()));
     }
 
     public String clown() {
