@@ -57,7 +57,7 @@ public class ReactionService {
         final Set<String> words = words(text);
         for (final String word : words) {
             for (final String clownWord : clownTriggerWords) {
-                if (isObfuscation(word, clownWord, 2)) {
+                if (isObfuscation(word, clownWord, 1)) {
                     return true;
                 }
             }
