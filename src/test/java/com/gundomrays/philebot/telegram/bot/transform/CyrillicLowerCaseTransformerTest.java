@@ -23,6 +23,17 @@ public class CyrillicLowerCaseTransformerTest {
     }
 
     @Test
+    void transformWithAccentsTest() {
+        // Input string with values to be converted
+        String input = "ćypoк";
+        // Expected output with values converted
+        String expectedOutput = "сурок";
+
+        // Call transform on input and compare the result to expected output
+        assertEquals(expectedOutput, cyrillicLowerCaseTransformer.transform(input));
+    }
+
+    @Test
     void transformIgnoreCaseTest() {
         // Input string with values to be converted
         String input = "CyPoк";

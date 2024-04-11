@@ -2,7 +2,9 @@ package com.gundomrays.philebot.telegram.bot.transform;
 
 import org.springframework.stereotype.Service;
 
+import java.text.Normalizer;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 @Service
 public class CyrillicLowerCaseTransformer implements MessageTransformer {
@@ -20,7 +22,7 @@ public class CyrillicLowerCaseTransformer implements MessageTransformer {
     @Override
     public String transform(String input) {
         final StringBuilder transformed = new StringBuilder();
-        input.toLowerCase().chars().forEach(c -> {
+        removeAccents(input).toLowerCase().chars().forEach(c -> {
             final Character cyrillic = LETTERS.get((char) c);
             if (cyrillic != null) {
                 transformed.append(cyrillic);
@@ -29,6 +31,12 @@ public class CyrillicLowerCaseTransformer implements MessageTransformer {
             }
         });
         return transformed.toString();
+    }
+
+    private String removeAccents(final String input) {
+        final String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
+        final Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        return pattern.matcher(normalized).replaceAll("");
     }
 
 }
