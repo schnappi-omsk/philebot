@@ -20,8 +20,12 @@ public class CyrillicLowerCaseTransformer implements MessageTransformer {
             'h', 'н'
     );
 
+
     @Override
     public String transform(String input) {
+        if (input == null) {
+            return null;
+        }
         final StringBuilder transformed = new StringBuilder();
         removeAccents(input).toLowerCase().chars().forEach(c -> {
             final Character cyrillic = LETTERS.get((char) c);

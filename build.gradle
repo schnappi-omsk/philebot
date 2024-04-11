@@ -42,6 +42,9 @@ dependencies {
     //Organizing queries to meet XAPI limitations
     implementation 'com.google.guava:guava:33.0.0-jre'
 
+    //Utils
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
+
     //Sugar
     compileOnly 'org.projectlombok:lombok'
 
