@@ -10,4 +10,9 @@ public class TelegramChatUtils {
         return String.format("<a href='%s'>%s</a>", url, text);
     }
 
+    public static String createUserLink(final String tgId, final String tgName) {
+        String userPingUrl = makePingUrl(String.valueOf(tgId));
+        return wrapLink(userPingUrl, "@" + tgName);
+    }
+
 }
