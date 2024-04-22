@@ -8,6 +8,6 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 @Repository
-public interface ChatAwardsRepository extends CrudRepository<ChatAwards, String> {
+public interface ChatAwardsRepository extends CrudRepository<ChatAwards, String>, ChatAwardsRepositoryExtension {
     Optional<ChatAwards> findByAwardDate(LocalDate awardDate);
 }
