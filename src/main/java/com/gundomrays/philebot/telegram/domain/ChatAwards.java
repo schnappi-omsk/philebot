@@ -11,7 +11,8 @@ import java.time.LocalDate;
 @Getter
 @Setter
 public class ChatAwards {
-    @Id
     private String tgId;
+
+    @Id
     private LocalDate awardDate;
 }
