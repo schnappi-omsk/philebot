@@ -28,11 +28,10 @@ public class AwardCommandUtils {
     }
 
     private static String declension(final Long value) {
-        final String postfix = switch ((int) (value % 10)) {
+        return switch ((int) (value % 10)) {
             case 2, 3, 4 -> value < 10 || value > 20 ? " раза" : " раз";
             default -> " раз";
         };
-        return postfix;
     }
 
 
