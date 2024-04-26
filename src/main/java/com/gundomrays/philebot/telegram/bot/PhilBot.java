@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.abilitybots.api.bot.AbilityBot;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember;
 import org.telegram.telegrambots.meta.api.methods.reactions.SetMessageReaction;
@@ -21,22 +21,22 @@ import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
 import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
+import org.telegram.telegrambots.meta.api.objects.message.Message;
+import org.telegram.telegrambots.meta.api.objects.reactions.ReactionType;
 import org.telegram.telegrambots.meta.api.objects.reactions.ReactionTypeEmoji;
 import org.telegram.telegrambots.meta.api.objects.stickers.Sticker;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
+import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-public class PhilBot extends TelegramLongPollingBot {
+public class PhilBot extends AbilityBot {
 
     private static final Logger log = LoggerFactory.getLogger(PhilBot.class);
-
-    @Value("${tg.botName}")
-    private String botName;
 
     @Value("${messages.congrats}")
     private String congrats;
@@ -67,8 +67,8 @@ public class PhilBot extends TelegramLongPollingBot {
     @Autowired
     private ReactionService reactionService;
 
-    public PhilBot(String botToken) {
-        super(botToken);
+    public PhilBot(TelegramClient telegramClient, String botUsername) {
+        super(telegramClient, botUsername);
     }
 
     @PostConstruct
@@ -77,7 +77,7 @@ public class PhilBot extends TelegramLongPollingBot {
     }
 
     @Override
-    public void onUpdateReceived(Update update) {
+    public void consume(Update update) {
         Message message = update.getMessage();
         User from = message.getFrom();
         String messageText = message.getText();
@@ -172,7 +172,7 @@ public class PhilBot extends TelegramLongPollingBot {
                 .userId(userId)
                 .build();
         try {
-            final ChatMember chatMember = execute(chatMemberGetter);
+            final ChatMember chatMember = telegramClient.execute(chatMemberGetter);
             return chatMember != null
                     && !"left".equalsIgnoreCase(chatMember.getStatus())
                     && !"kicked".equalsIgnoreCase(chatMember.getStatus());
@@ -189,17 +189,27 @@ public class PhilBot extends TelegramLongPollingBot {
     }
 
     public void react(final Message message) {
+        if (message == null || message.getText() == null) {
+            return;
+        }
         if (reactionService.needsClownReaction(message.getText())) {
-            final SetMessageReaction reaction = SetMessageReaction.builder()
+            ReactionType reactionEmoji = ReactionTypeEmoji.builder()
+                    .type(ReactionTypeEmoji.EMOJI_TYPE)
+                    .emoji(reactionService.clown())
+                    .build();
+            SetMessageReaction reaction = SetMessageReaction.builder()
                     .chatId(chatId)
                     .messageId(message.getMessageId())
-                    .reactionTypes(List.of(ReactionTypeEmoji.builder().type(ReactionTypeEmoji.EMOJI_TYPE).emoji(reactionService.clown()).build()))
+                    .reactionTypes(List.of(reactionEmoji))
                     .build();
             try {
-                execute(reaction);
+                telegramClient.execute(reaction);
             } catch (TelegramApiException e) {
                 throw new TelegramException(e.getMessage(), e);
             }
+        }
+        if (reactionService.needsManReaction(message.getText())) {
+            sendSticker(chatId, reactionService.manSticker(), reactionService.man(), message.getMessageId());
         }
     }
 
@@ -211,7 +221,7 @@ public class PhilBot extends TelegramLongPollingBot {
                 .text(text)
                 .build();
         try {
-            execute(sender);
+            telegramClient.execute(sender);
         } catch (TelegramApiException e) {
             throw new TelegramException(e.getMessage(), e);
         }
@@ -226,7 +236,7 @@ public class PhilBot extends TelegramLongPollingBot {
                 .caption(caption)
                 .build();
         try {
-            execute(sender);
+            telegramClient.execute(sender);
         } catch (TelegramApiException e) {
             throw new TelegramException(e.getMessage(), e);
         }
@@ -240,20 +250,26 @@ public class PhilBot extends TelegramLongPollingBot {
                 .text(text)
                 .build();
         try {
-            return execute(sender);
+            return telegramClient.execute(sender);
         } catch (TelegramApiException e) {
             throw new TelegramException(e.getMessage(), e);
         }
     }
 
     public void sendSticker(Long chatId, String sticker, String emoji) {
+        sendSticker(chatId, sticker, emoji, null);
+    }
+
+    public void sendSticker(Long chatId, String sticker, String emoji, Integer replyToId) {
         final SendSticker sender = SendSticker.builder()
                 .chatId(chatId)
+                .replyToMessageId(replyToId)
                 .sticker(new InputFile(sticker))
                 .emoji(emoji)
                 .build();
+
         try {
-            execute(sender);
+            telegramClient.execute(sender);
         } catch (TelegramApiException e) {
             throw new TelegramException(e.getMessage(), e);
         }
@@ -296,8 +312,8 @@ public class PhilBot extends TelegramLongPollingBot {
     }
 
     @Override
-    public String getBotUsername() {
-        return botName;
+    public long creatorId() {
+        return 112639296;
     }
 
 }

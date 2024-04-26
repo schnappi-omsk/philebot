@@ -22,7 +22,18 @@ public class ReactionService {
     @Value("${messages.react.clown.triggers}")
     private String clownTriggers;
 
+    @Value("${messages.react.custom.man.emoji}")
+    private String manEmoji;
+
+    @Value("${messages.react.custom.man.sticker}")
+    private String manSticker;
+
+    @Value("${messages.react.custom.man.triggers}")
+    private String manTriggers;
+
     private Set<String> clownTriggerWords = new HashSet<>();
+
+    private Set<String> manTriggerWords = new HashSet<>();
 
     private final MessageTransformer cyrillicLowerCaseTransformer;
 
@@ -33,6 +44,7 @@ public class ReactionService {
     @PostConstruct
     private void init() {
         clownTriggerWords = new HashSet<>(Arrays.asList(clownTriggers.split(",")));
+        manTriggerWords = new HashSet<>(Arrays.asList(manTriggers.split(",")));
     }
 
     public boolean needsClownReaction(final String messageText) {
@@ -45,6 +57,18 @@ public class ReactionService {
 
     public String clown() {
         return clownEmoji;
+    }
+
+    public boolean needsManReaction(final String messageText) {
+        return manTriggerWords.stream().anyMatch(messageText::contains);
+    }
+
+    public String man() {
+        return manEmoji;
+    }
+
+    public String manSticker() {
+        return manSticker;
     }
 
     private Set<String> words(final String text) {
