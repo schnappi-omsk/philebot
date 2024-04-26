@@ -37,7 +37,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
     //Telegram API
-    implementation 'org.telegram:telegrambots:6.9.7.1'
+    implementation 'org.telegram:telegrambots-meta:7.2.1'
+    implementation 'org.telegram:telegrambots-client:7.2.1'
+    implementation 'org.telegram:telegrambots-springboot-longpolling-starter:7.2.1'
+    implementation 'org.telegram:telegrambots-abilities:7.2.1'
 
     //Organizing queries to meet XAPI limitations
     implementation 'com.google.guava:guava:33.0.0-jre'
@@ -49,6 +52,7 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
 
     annotationProcessor 'org.projectlombok:lombok'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.7.22"
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'

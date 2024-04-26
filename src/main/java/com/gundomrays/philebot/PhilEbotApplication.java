@@ -1,22 +1,25 @@
 package com.gundomrays.philebot;
 
 import com.gundomrays.philebot.telegram.bot.PhilBot;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.telegram.telegrambots.meta.TelegramBotsApi;
+import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 
 @SpringBootApplication(scanBasePackages = {"com.gundomrays.philebot"})
 public class PhilEbotApplication {
-    final TelegramBotsApi telegramBotsApi;
+    final TelegramBotsLongPollingApplication botsApplication;
 
-    final
-    PhilBot philBot;
+    final PhilBot philBot;
 
-    public PhilEbotApplication(TelegramBotsApi telegramBotsApi, PhilBot philBot) {
-        this.telegramBotsApi = telegramBotsApi;
+    @Value("${tg.apiToken}")
+    private String apiToken;
+
+    public PhilEbotApplication(PhilBot philBot) {
+        this.botsApplication = new TelegramBotsLongPollingApplication();
         this.philBot = philBot;
     }
 
@@ -26,9 +29,7 @@ public class PhilEbotApplication {
 
     @Bean
     public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
-        return args -> {
-            telegramBotsApi.registerBot(philBot);
-        };
+        return args -> botsApplication.registerBot(apiToken, philBot);
     }
 
 }
