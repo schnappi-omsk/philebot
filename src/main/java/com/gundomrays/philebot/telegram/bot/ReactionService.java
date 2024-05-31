@@ -31,9 +31,14 @@ public class ReactionService {
     @Value("${messages.react.custom.man.triggers}")
     private String manTriggers;
 
+    @Value("${messages.react.custom.man.exceptions}")
+    private String manExceptions;
+
     private Set<String> clownTriggerWords = new HashSet<>();
 
     private Set<String> manTriggerWords = new HashSet<>();
+
+    private Set<String> manExceptionWords = new HashSet<>();
 
     private final MessageTransformer cyrillicLowerCaseTransformer;
 
@@ -45,6 +50,7 @@ public class ReactionService {
     private void init() {
         clownTriggerWords = new HashSet<>(Arrays.asList(clownTriggers.split(",")));
         manTriggerWords = new HashSet<>(Arrays.asList(manTriggers.split(",")));
+        manExceptionWords = new HashSet<>(Arrays.asList(manExceptions.split(",")));
     }
 
     public boolean needsClownReaction(final String messageText) {
@@ -60,7 +66,23 @@ public class ReactionService {
     }
 
     public boolean needsManReaction(final String messageText) {
-        return manTriggerWords.stream().anyMatch(messageText::contains);
+        if (messageText == null) {
+            return false;
+        }
+
+        HashSet<String> messageWords = new HashSet<>(Arrays.asList(messageText.toLowerCase().split(" ")));
+
+        for (final String word : messageWords) {
+            boolean triggered = manTriggerWords.stream().map(String::toLowerCase).anyMatch(word::contains);
+            if (triggered) {
+                boolean noException = manExceptionWords.stream().map(String::toLowerCase).noneMatch(word::contains);
+                if (noException) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     public String man() {
