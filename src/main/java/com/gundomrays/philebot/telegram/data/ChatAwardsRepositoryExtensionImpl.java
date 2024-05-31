@@ -41,6 +41,11 @@ public class ChatAwardsRepositoryExtensionImpl implements ChatAwardsRepositoryEx
         return leaderboardFrom(firstOfThisMonth);
     }
 
+    @Override
+    public List<AwardScore> overallLeaderboard() {
+        return leaderboardFrom(LocalDate.EPOCH);
+    }
+
     private List<AwardScore> leaderboardFrom(final LocalDate startDate) {
         Query query = entityManager.createNativeQuery(LEADERBOARD_SQL);
         query.setParameter("startDate", startDate);
