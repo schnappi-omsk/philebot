@@ -7,4 +7,5 @@ import java.util.List;
 public interface ChatAwardsRepositoryExtension {
     List<AwardScore> weeklyLeaderboard();
     List<AwardScore> monthlyLeaderboard();
+    List<AwardScore> overallLeaderboard();
 }
