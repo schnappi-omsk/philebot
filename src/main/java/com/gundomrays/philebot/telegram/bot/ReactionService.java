@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.Normalizer;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -56,10 +57,13 @@ public class ReactionService {
     public boolean needsClownReaction(final String messageText) {
         final String transformed = cyrillicLowerCaseTransformer.transform(messageText);
         final boolean contains = containsClownTrigger(transformed);
-        final boolean obfuscated = containsObfuscatedClownTrigger(transformed);
-        final boolean divided = containsDividedClownTrigger(transformed);
 
-        return contains || obfuscated || divided;
+        final Set<String> words = words(transformed);
+        final boolean obfuscated = containsObfuscatedClownTrigger(words);
+        final boolean divided = containsDividedClownTrigger(words);
+        final boolean splitted = isSplitted(words);
+
+        return contains || obfuscated || divided || splitted;
     }
 
     public String clown() {
@@ -100,8 +104,7 @@ public class ReactionService {
                 .collect(Collectors.toSet());
     }
 
-    private boolean containsDividedClownTrigger(final String text) {
-        final Set<String> words = words(text);
+    private boolean containsDividedClownTrigger(Set<String> words) {
         for (final String word : words) {
             for (final String clownWord : clownTriggerWords) {
                 if (isDivided(word, clownWord)) {
@@ -118,8 +121,7 @@ public class ReactionService {
                 .contains(clownWord.toLowerCase());
     }
 
-    private boolean containsObfuscatedClownTrigger(final String text) {
-        final Set<String> words = words(text);
+    private boolean containsObfuscatedClownTrigger(final Set<String> words) {
         for (final String word : words) {
             for (final String clownWord : clownTriggerWords) {
                 if (isObfuscation(word, clownWord, 1)) {
@@ -128,6 +130,20 @@ public class ReactionService {
             }
         }
         return false;
+    }
+
+    private boolean isSplitted(Set<String> words) {
+        final int maxTriggerLength = clownTriggerWords.stream().map(String::length)
+                .max(Comparator.naturalOrder()).orElse(0);
+        final StringBuilder shortWords = new StringBuilder();
+
+        for (final String word : words) {
+            if (word.length() < maxTriggerLength) {
+                shortWords.append(word);
+            }
+        }
+
+        return containsClownTrigger(shortWords.toString());
     }
 
     private boolean containsClownTrigger(final String text) {
@@ -139,7 +155,8 @@ public class ReactionService {
 
     private boolean isObfuscation(final String value, final String listed, final int threshold) {
         final String normalized = Normalizer.normalize(value, Normalizer.Form.NFD);
-        final String retained = CharMatcher.javaLetterOrDigit().retainFrom(normalized);
+        final String noCombiningChars = normalized.replaceAll("\\p{M}", "");
+        final String retained = CharMatcher.javaLetterOrDigit().retainFrom(noCombiningChars);
         final int distance = StringUtils.getLevenshteinDistance(retained, listed);
         return distance <= threshold;
     }
