@@ -122,15 +122,22 @@ public class ReactionService {
 
     private boolean containsObfuscatedClownTrigger(final List<String> words) {
         for (final String word : words) {
-            int threshold = 1;
-            for (final String clownWord : clownTriggerWords) {
-                if (word.length() <= clownWord.length()) {
-                    final int nonLetterChars = nonLettersCount(word);
-                    threshold = nonLetterChars > 1 ? clownWord.length() / 2 : 1;
-                }
-                if (isObfuscation(word, clownWord, threshold)) {
-                    return true;
-                }
+            if (containsObfuscatedClownTrigger(word)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean containsObfuscatedClownTrigger(String word) {
+        int threshold = 1;
+        for (final String clownWord : clownTriggerWords) {
+            if (word.length() <= clownWord.length()) {
+                final int nonLetterChars = nonLettersCount(word);
+                threshold = nonLetterChars > 1 ? clownWord.length() / 2 : 1;
+            }
+            if (isObfuscation(word, clownWord, threshold)) {
+                return true;
             }
         }
         return false;
@@ -147,7 +154,8 @@ public class ReactionService {
             }
         }
 
-        return containsClownTrigger(shortWords.toString());
+        String resultText = shortWords.toString();
+        return containsClownTrigger(resultText) || containsObfuscatedClownTrigger(resultText);
     }
 
     private boolean containsClownTrigger(final String text) {
