@@ -126,7 +126,7 @@ public class ReactionService {
     private boolean containsObfuscatedClownTrigger(final Set<String> words) {
         for (final String word : words) {
             final int nonLetterChars = nonLettersCount(word);
-            final int threshold = nonLetterChars > 0 ? nonLetterChars : 1;
+            final int threshold = nonLetterChars > 1 ? word.length() / 2 : 1;
             for (final String clownWord : clownTriggerWords) {
                 if (isObfuscation(word, clownWord, threshold)) {
                     return true;
