@@ -12,6 +12,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -123,8 +125,10 @@ public class ReactionService {
 
     private boolean containsObfuscatedClownTrigger(final Set<String> words) {
         for (final String word : words) {
+            final int nonLetterChars = nonLettersCount(word);
+            final int threshold = nonLetterChars > 0 ? nonLetterChars : 1;
             for (final String clownWord : clownTriggerWords) {
-                if (isObfuscation(word, clownWord, 1)) {
+                if (isObfuscation(word, clownWord, threshold)) {
                     return true;
                 }
             }
@@ -159,6 +163,16 @@ public class ReactionService {
         final String retained = CharMatcher.javaLetterOrDigit().retainFrom(noCombiningChars);
         final int distance = StringUtils.getLevenshteinDistance(retained, listed);
         return distance <= threshold;
+    }
+
+    private int nonLettersCount(final String word) {
+        final Pattern pattern = Pattern.compile("[^\\p{L}]");
+        final Matcher matcher = pattern.matcher(word);
+        int count = 0;
+        while (matcher.find()) {
+            count++;
+        }
+        return count;
     }
 
 }
