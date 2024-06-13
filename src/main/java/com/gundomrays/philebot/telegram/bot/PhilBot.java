@@ -78,7 +78,7 @@ public class PhilBot extends AbilityBot {
 
     @Override
     public void consume(Update update) {
-        Message message = update.getMessage();
+        Message message = update.hasEditedMessage() ? update.getEditedMessage() : update.getMessage();
         User from = message.getFrom();
         String messageText = message.getText();
 
