@@ -8,10 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.text.Normalizer;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -60,7 +57,7 @@ public class ReactionService {
         final String transformed = cyrillicLowerCaseTransformer.transform(messageText);
         final boolean contains = containsClownTrigger(transformed);
 
-        final Set<String> words = words(transformed);
+        final List<String> words = words(transformed);
         final boolean obfuscated = containsObfuscatedClownTrigger(words);
         final boolean divided = containsDividedClownTrigger(words);
         final boolean splitted = isSplitted(words);
@@ -100,13 +97,13 @@ public class ReactionService {
         return manSticker;
     }
 
-    private Set<String> words(final String text) {
+    private List<String> words(final String text) {
         return Arrays.stream(text.split("\\R"))
                 .flatMap(line -> Arrays.stream(line.split("\\s+")))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
     }
 
-    private boolean containsDividedClownTrigger(Set<String> words) {
+    private boolean containsDividedClownTrigger(List<String> words) {
         for (final String word : words) {
             for (final String clownWord : clownTriggerWords) {
                 if (isDivided(word, clownWord)) {
@@ -123,7 +120,7 @@ public class ReactionService {
                 .contains(clownWord.toLowerCase());
     }
 
-    private boolean containsObfuscatedClownTrigger(final Set<String> words) {
+    private boolean containsObfuscatedClownTrigger(final List<String> words) {
         for (final String word : words) {
             int threshold = 1;
             for (final String clownWord : clownTriggerWords) {
@@ -139,7 +136,7 @@ public class ReactionService {
         return false;
     }
 
-    private boolean isSplitted(Set<String> words) {
+    private boolean isSplitted(List<String> words) {
         final int maxTriggerLength = clownTriggerWords.stream().map(String::length)
                 .max(Comparator.naturalOrder()).orElse(0);
         final StringBuilder shortWords = new StringBuilder();
