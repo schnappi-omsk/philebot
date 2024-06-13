@@ -124,9 +124,14 @@ public class ReactionService {
     }
 
     private boolean containsObfuscatedClownTrigger(final Set<String> words) {
+        final int maxTriggerLength = clownTriggerWords.stream().map(String::length)
+                .max(Comparator.naturalOrder()).orElse(0);
         for (final String word : words) {
-            final int nonLetterChars = nonLettersCount(word);
-            final int threshold = nonLetterChars > 1 ? word.length() / 2 : 1;
+            int threshold = 1;
+            if (word.length() <= maxTriggerLength) {
+                final int nonLetterChars = nonLettersCount(word);
+                threshold = nonLetterChars > 1 ? word.length() / 2 : 1;
+            }
             for (final String clownWord : clownTriggerWords) {
                 if (isObfuscation(word, clownWord, threshold)) {
                     return true;
