@@ -57,8 +57,9 @@ public class ReactionService {
         final String transformed = cyrillicLowerCaseTransformer.transform(messageText);
         final boolean contains = containsClownTrigger(transformed);
         final boolean obfuscated = containsObfuscatedClownTrigger(transformed);
+        final boolean divided = containsDividedClownTrigger(transformed);
 
-        return contains || obfuscated;
+        return contains || obfuscated || divided;
     }
 
     public String clown() {
@@ -97,6 +98,24 @@ public class ReactionService {
         return Arrays.stream(text.split("\\R"))
                 .flatMap(line -> Arrays.stream(line.split("\\s+")))
                 .collect(Collectors.toSet());
+    }
+
+    private boolean containsDividedClownTrigger(final String text) {
+        final Set<String> words = words(text);
+        for (final String word : words) {
+            for (final String clownWord : clownTriggerWords) {
+                if (isDivided(word, clownWord)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean isDivided(String word, String clownWord) {
+        return word.replaceAll("[^\\p{L}]", "")
+                .toLowerCase()
+                .contains(clownWord.toLowerCase());
     }
 
     private boolean containsObfuscatedClownTrigger(final String text) {
