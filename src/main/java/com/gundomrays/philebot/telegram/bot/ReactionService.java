@@ -130,8 +130,8 @@ public class ReactionService {
     }
 
     private boolean containsObfuscatedClownTrigger(String word) {
-        int threshold = 1;
         for (final String clownWord : clownTriggerWords) {
+            int threshold = 1;
             if (word.length() <= clownWord.length()) {
                 final int nonLetterChars = nonLettersCount(word);
                 threshold = nonLetterChars > 1 ? clownWord.length() / 2 : 1;
