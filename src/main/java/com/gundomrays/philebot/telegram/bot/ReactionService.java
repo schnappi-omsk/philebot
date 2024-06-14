@@ -16,6 +16,22 @@ import java.util.stream.Collectors;
 @Service
 public class ReactionService {
 
+    private static final Map<Character, Character> controlCharacterPairs = Map.ofEntries(
+            Map.entry('(', ')'),
+            Map.entry('{', '}'),
+            Map.entry('[', ']'),
+            Map.entry('<', '>'),
+            Map.entry('«', '»'),
+            Map.entry('｛', '｝'),
+            Map.entry('［', '］'),
+            Map.entry('（', '）'),
+            Map.entry('＜', '＞'),
+            Map.entry('【', '】'),
+            Map.entry('〖', '〗'),
+            Map.entry('《', '》'),
+            Map.entry('「', '」')
+    );
+
     @Value("${messages.react.clown.emoji}")
     private String clownEmoji;
 
@@ -134,7 +150,7 @@ public class ReactionService {
             int threshold = 1;
             if (word.length() <= clownWord.length()) {
                 final int nonLetterChars = nonLettersCount(word);
-                threshold = nonLetterChars > 1 ? clownWord.length() / 2 : 1;
+                threshold = Math.max(nonLetterChars, 1);
             }
             if (isObfuscation(word, clownWord, threshold)) {
                 return true;
@@ -173,7 +189,8 @@ public class ReactionService {
         return distance <= threshold;
     }
 
-    private int nonLettersCount(final String word) {
+    private int nonLettersCount(final String input) {
+        final String word = isQuoted(input) ? input.substring(1, input.length() - 1) : input;
         final Pattern pattern = Pattern.compile("[^\\p{L}]");
         final Matcher matcher = pattern.matcher(word);
         int count = 0;
@@ -183,4 +200,20 @@ public class ReactionService {
         return count;
     }
 
+    private boolean isQuoted(final String input) {
+        if (input == null || input.length() < 3) {
+            return false;
+        }
+
+        final String stdQuotes = "\"\"''";
+
+        final String str = input.trim();
+        char firstChar = str.charAt(0);
+        char lastChar = str.charAt(str.length() - 1);
+        if (stdQuotes.contains(String.valueOf(firstChar)) || stdQuotes.contains(String.valueOf(lastChar))) {
+            return true;
+        }
+
+        return controlCharacterPairs.get(firstChar) != null && controlCharacterPairs.get(firstChar) == lastChar;
+    }
 }
