@@ -150,7 +150,10 @@ public class ReactionService {
             int threshold = 1;
             if (word.length() <= clownWord.length()) {
                 final int nonLetterChars = nonLettersCount(word);
-                threshold = Math.max(nonLetterChars, 1);
+                final boolean needToUpdateThreshold = nonLetterChars > 0 && nonLetterChars < word.length() / 2;
+                if (needToUpdateThreshold) {
+                    threshold = word.length() / 2;
+                }
             }
             if (isObfuscation(word, clownWord, threshold)) {
                 return true;
