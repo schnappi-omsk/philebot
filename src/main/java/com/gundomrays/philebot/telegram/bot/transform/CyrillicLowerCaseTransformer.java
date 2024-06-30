@@ -17,7 +17,9 @@ public class CyrillicLowerCaseTransformer implements MessageTransformer {
             'x', 'х',
             'a', 'а',
             'y', 'у',
-            'h', 'н'
+            'h', 'н',
+            '$', 'с',
+            '₽', 'р'
     );
 
 
