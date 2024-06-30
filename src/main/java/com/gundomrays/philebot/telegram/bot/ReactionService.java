@@ -187,9 +187,9 @@ public class ReactionService {
     private boolean isObfuscation(final String value, final String listed, final int threshold) {
         final String normalized = Normalizer.normalize(value, Normalizer.Form.NFD);
         final String noCombiningChars = normalized.replaceAll("\\p{M}", "");
-        final String retained = CharMatcher.javaLetterOrDigit().retainFrom(noCombiningChars);
+        final String retained = CharMatcher.javaLetterOrDigit().retainFrom(noCombiningChars).replaceAll("\\p{Punct}", "");
         final int distance = StringUtils.getLevenshteinDistance(retained, listed);
-        return distance <= threshold;
+        return retained.length() == listed.length() && distance <= threshold;
     }
 
     private int nonLettersCount(final String input) {
