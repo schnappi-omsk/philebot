@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.util.ResourceUtils;
 import org.telegram.telegrambots.abilitybots.api.bot.AbilityBot;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember;
@@ -19,7 +20,9 @@ import org.telegram.telegrambots.meta.api.methods.reactions.SetMessageReaction;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
-import org.telegram.telegrambots.meta.api.objects.*;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
+import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.api.objects.reactions.ReactionType;
@@ -29,6 +32,8 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
@@ -113,6 +118,16 @@ public class PhilBot extends AbilityBot {
                 log.info("Message from: {}, text: {}, in the chat: {}", from.getUserName(), messageText, message.getChatId());
             }
             react(message);
+            if (message.hasVoice()) {
+                try {
+                    reply(message.getChatId(),
+                            message.getMessageId(),
+                            "",
+                            ResourceUtils.getFile("classpath:media/audio.jpg"));
+                } catch (FileNotFoundException e) {
+                    throw new TelegramException(e.getMessage(), e);
+                }
+            }
         }
     }
 
@@ -233,6 +248,21 @@ public class PhilBot extends AbilityBot {
                 .chatId(chatId)
                 .replyToMessageId(msgId)
                 .photo(new InputFile(photoUrl))
+                .caption(caption)
+                .build();
+        try {
+            telegramClient.execute(sender);
+        } catch (TelegramApiException e) {
+            throw new TelegramException(e.getMessage(), e);
+        }
+    }
+
+    public void reply(Long chatId, Integer msgId, String caption, File photo) {
+        final SendPhoto sender = SendPhoto.builder()
+                .parseMode(ParseMode.HTML)
+                .chatId(chatId)
+                .replyToMessageId(msgId)
+                .photo(new InputFile(photo))
                 .caption(caption)
                 .build();
         try {
