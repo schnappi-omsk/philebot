@@ -34,6 +34,7 @@ import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
@@ -119,14 +120,10 @@ public class PhilBot extends AbilityBot {
             }
             react(message);
             if (message.hasVoice()) {
-                try {
-                    reply(message.getChatId(),
-                            message.getMessageId(),
-                            "",
-                            ResourceUtils.getFile("classpath:media/audio.jpg"));
-                } catch (FileNotFoundException e) {
-                    throw new TelegramException(e.getMessage(), e);
-                }
+                reply(message.getChatId(),
+                        message.getMessageId(),
+                        "",
+                        getClass().getClassLoader().getResourceAsStream("media/audio.jpg"), "audio.jpg");
             }
         }
     }
@@ -257,12 +254,12 @@ public class PhilBot extends AbilityBot {
         }
     }
 
-    public void reply(Long chatId, Integer msgId, String caption, File photo) {
+    public void reply(Long chatId, Integer msgId, String caption, InputStream photo, String fileName) {
         final SendPhoto sender = SendPhoto.builder()
                 .parseMode(ParseMode.HTML)
                 .chatId(chatId)
                 .replyToMessageId(msgId)
-                .photo(new InputFile(photo))
+                .photo(new InputFile(photo, fileName))
                 .caption(caption)
                 .build();
         try {
