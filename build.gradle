@@ -45,6 +45,8 @@ dependencies {
     //Organizing queries to meet XAPI limitations
     implementation 'com.google.guava:guava:33.0.0-jre'
 
+    implementation 'org.apache.commons:commons-csv:1.12.0'
+
     //Utils
     implementation 'org.apache.commons:commons-lang3:3.12.0'
 
