@@ -24,6 +24,8 @@ ebot:
   serviceHost: testHost
   limitPerUser: 5
   requestsPerMin: 10.0
+clown:
+  csvUrl: https://wokedetector.cirnoslab.me/data.csv
 server:
   servlet:
     context-path: /
