@@ -12,11 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.util.ResourceUtils;
 import org.telegram.telegrambots.abilitybots.api.bot.AbilityBot;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember;
 import org.telegram.telegrambots.meta.api.methods.reactions.SetMessageReaction;
+import org.telegram.telegrambots.meta.api.methods.send.SendAnimation;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
@@ -24,6 +24,7 @@ import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
+import org.telegram.telegrambots.meta.api.objects.games.Animation;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.api.objects.reactions.ReactionType;
 import org.telegram.telegrambots.meta.api.objects.reactions.ReactionTypeEmoji;
@@ -32,8 +33,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
@@ -114,9 +113,16 @@ public class PhilBot extends AbilityBot {
         } else {
             if (message.hasSticker()) {
                 Sticker sticker = message.getSticker();
-                log.info("Sticker sent by {}: id: {}, unique id: {}", from.getUserName(), sticker.getFileId(), sticker.getFileUniqueId());
+                log.info("Sticker sent by {}, id: {}, unique id: {}, sticker set: {}", from.getUserName(), sticker.getFileId(), sticker.getFileUniqueId(), sticker.getSetName());
+                if (reactionService.needsScream(sticker.getSetName())) {
+                    sendGif(message.getChatId(), reactionService.screamGif(), message.getMessageId());
+                }
             } else {
                 log.info("Message from: {}, text: {}, in the chat: {}", from.getUserName(), messageText, message.getChatId());
+            }
+            if (message.hasAnimation()) {
+                Animation gif = message.getAnimation();
+                log.info("GIF by {}, id: {}, unique id: {}", from.getUserName(), gif.getFileId(), gif.getFileUniqueId());
             }
             react(message);
             if (message.hasVoice()) {
@@ -295,6 +301,19 @@ public class PhilBot extends AbilityBot {
                 .emoji(emoji)
                 .build();
 
+        try {
+            telegramClient.execute(sender);
+        } catch (TelegramApiException e) {
+            throw new TelegramException(e.getMessage(), e);
+        }
+    }
+
+    public void sendGif(Long chatId, String gif, Integer replyToId) {
+        final SendAnimation sender = SendAnimation.builder()
+                .chatId(chatId)
+                .replyToMessageId(replyToId)
+                .animation(new InputFile(gif))
+                .build();
         try {
             telegramClient.execute(sender);
         } catch (TelegramApiException e) {
