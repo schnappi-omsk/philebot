@@ -50,6 +50,12 @@ public class ReactionService {
     @Value("${messages.react.custom.man.exceptions}")
     private String manExceptions;
 
+    @Value("${messages.scream_sets}")
+    private Set<String> screamSets;
+
+    @Value("${messages.scream_gif}")
+    private String screamGif;
+
     private Set<String> clownTriggerWords = new HashSet<>();
 
     private Set<String> manTriggerWords = new HashSet<>();
@@ -103,6 +109,14 @@ public class ReactionService {
         }
 
         return false;
+    }
+
+    public boolean needsScream(final String stickerSetName) {
+        return screamSets != null && screamSets.contains(stickerSetName);
+    }
+
+    public String screamGif() {
+        return screamGif;
     }
 
     public String man() {
