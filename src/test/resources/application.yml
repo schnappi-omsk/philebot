@@ -36,6 +36,8 @@ messages:
   congrats: Разъебывает
   congrats_sticker: CAACAgIAAxkBAAMGZce_ogbN5DbsntxkIyOJ3RTKFZ8AAsEXAAIdTRFKqcvbjvNhzeU0BA
   congrats_emoji: 😐
+  scream_gif: CgACAgIAAx0CefUPJwACAo9n5Y6vw7IM0GBS8jp8efYYcQqqFAAClwEAAvwlgEqBXgu126okjjYE
+  scream_sets: adVanced2
   deactivate: Пиздец, %s ливнул из чата, нахуя нам его ачивки? Выключим пока...
   activate: С возвращением, %s! Включил вывод твоих ачивок, с тебя $20.
   react:
