@@ -29,7 +29,7 @@ spring:
       ddl-auto: none
 messages:
   periodical:
-    text: Мда, %s, конечно, не шарит...
+    text: %s прекрасно шарит! Как и все в этом чате!
     probability: 5
   congrats: Разъебывает
   congrats_sticker: CAACAgIAAxkBAAMGZce_ogbN5DbsntxkIyOJ3RTKFZ8AAsEXAAIdTRFKqcvbjvNhzeU0BA
