@@ -36,6 +36,7 @@ import org.telegram.telegrambots.meta.generics.TelegramClient;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -207,10 +208,17 @@ public class PhilBot extends AbilityBot {
     }
 
     public void react(final Message message) {
-        if (message == null || message.getText() == null) {
+        if (message == null) {
             return;
         }
-        if (reactionService.needsClownReaction(message.getText())) {
+        final String messageText = message.getText() == null
+                || message.getText().isEmpty()
+                ? message.getCaption()
+                : message.getText();
+        if (messageText == null) {
+            return;
+        }
+        if (reactionService.needsClownReaction(messageText)) {
             ReactionType reactionEmoji = ReactionTypeEmoji.builder()
                     .type(ReactionTypeEmoji.EMOJI_TYPE)
                     .emoji(reactionService.clown())
@@ -226,7 +234,7 @@ public class PhilBot extends AbilityBot {
                 throw new TelegramException(e.getMessage(), e);
             }
         }
-        if (reactionService.needsManReaction(message.getText())) {
+        if (reactionService.needsManReaction(messageText)) {
             sendSticker(chatId, reactionService.manSticker(), reactionService.man(), message.getMessageId());
         }
     }
