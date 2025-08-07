@@ -211,14 +211,7 @@ public class PhilBot extends AbilityBot {
         if (message == null) {
             return;
         }
-        final String messageText = message.getText() == null
-                || message.getText().isEmpty()
-                ? message.getCaption()
-                : message.getText();
-        if (messageText == null) {
-            return;
-        }
-        if (reactionService.needsClownReaction(messageText)) {
+        if (reactionService.needsClownReaction(message)) {
             ReactionType reactionEmoji = ReactionTypeEmoji.builder()
                     .type(ReactionTypeEmoji.EMOJI_TYPE)
                     .emoji(reactionService.clown())
@@ -234,7 +227,7 @@ public class PhilBot extends AbilityBot {
                 throw new TelegramException(e.getMessage(), e);
             }
         }
-        if (reactionService.needsManReaction(messageText)) {
+        if (reactionService.needsManReaction(message)) {
             sendSticker(chatId, reactionService.manSticker(), reactionService.man(), message.getMessageId());
         }
     }

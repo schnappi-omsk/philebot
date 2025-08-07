@@ -6,6 +6,8 @@ import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.objects.message.Message;
+import org.telegram.telegrambots.meta.api.objects.stickers.Sticker;
 
 import java.text.Normalizer;
 import java.util.*;
@@ -56,6 +58,9 @@ public class ReactionService {
     @Value("${messages.scream_gif}")
     private String screamGif;
 
+    @Value("${messages.react.clown.sticker.uniqueId}")
+    private String clownSticker;
+
     private Set<String> clownTriggerWords = new HashSet<>();
 
     private Set<String> manTriggerWords = new HashSet<>();
@@ -75,23 +80,23 @@ public class ReactionService {
         manExceptionWords = new HashSet<>(Arrays.asList(manExceptions.split(",")));
     }
 
+    public boolean needsClownReaction(final Message message) {
+        if (message.hasSticker()) {
+            return checkSticker(message.getSticker());
+        }
+        return needsClownReaction(message.getText());
+    }
+
     public boolean needsClownReaction(final String messageText) {
-        final String transformed = cyrillicLowerCaseTransformer.transform(messageText);
-        final boolean contains = containsClownTrigger(transformed);
-
-        final List<String> words = words(transformed);
-        final boolean obfuscated = containsObfuscatedClownTrigger(words);
-        final boolean divided = containsDividedClownTrigger(words);
-        final boolean splitted = isSplitted(words);
-
-        return contains || obfuscated || divided || splitted;
+        return checkMsgText(messageText);
     }
 
     public String clown() {
         return clownEmoji;
     }
 
-    public boolean needsManReaction(final String messageText) {
+    public boolean needsManReaction(final Message message) {
+        final String messageText = message.getText();
         if (messageText == null) {
             return false;
         }
@@ -125,6 +130,23 @@ public class ReactionService {
 
     public String manSticker() {
         return manSticker;
+    }
+
+    private boolean checkMsgText(final String messageText) {
+        final String transformed = cyrillicLowerCaseTransformer.transform(messageText);
+        final boolean contains = containsClownTrigger(transformed);
+
+        final List<String> words = words(transformed);
+        final boolean obfuscated = containsObfuscatedClownTrigger(words);
+        final boolean divided = containsDividedClownTrigger(words);
+        final boolean splitted = isSplitted(words);
+
+        return contains || obfuscated || divided || splitted;
+    }
+
+    private boolean checkSticker(final Sticker sticker) {
+        final String id = sticker.getFileUniqueId();
+        return clownSticker.equals(id);
     }
 
     private List<String> words(final String text) {
