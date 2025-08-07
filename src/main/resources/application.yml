@@ -42,6 +42,10 @@ messages:
     clown:
       emoji: 🤡
       triggers: русня,русне,русней,руснёй,русню,хохол,хохлы,хохлов,хохлам,хохла,хохлу,хохло,я люблю рэп,пидорах
+      sticker:
+        id: CAACAgIAAx0CefUPJwACAqpolIdtj4VhU2yYInAGYdc2BsZ7WAAC6H8AAuKbkUjqoUrVN5dgrDYE
+        uniqueId: AgAD6H8AAuKbkUg
+        stickerSet: drochil_quotes
     custom:
       man:
         sticker: CAACAgIAAx0CefUPJwACATlmK6pvk0ytO4lGPEVVriEQOmdK3QACkhAAAqtKyUuSgBNYR-8rQDQE
