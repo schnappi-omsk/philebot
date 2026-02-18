@@ -112,6 +112,12 @@ public class PhilBot extends AbilityBot {
                 reply(message.getChatId(), message.getMessageId(), "Command not found: " + messageText);
             }
         } else {
+            if (message.hasPhoto()) {
+                final Random random = new Random();
+                if (random.nextInt(100) < 10) {
+                    reply(message.getChatId(), message.getMessageId(), "Это ИИ");
+                }
+            }
             if (message.hasSticker()) {
                 Sticker sticker = message.getSticker();
                 log.info("Sticker sent by {}, id: {}, unique id: {}, sticker set: {}", from.getUserName(), sticker.getFileId(), sticker.getFileUniqueId(), sticker.getSetName());
