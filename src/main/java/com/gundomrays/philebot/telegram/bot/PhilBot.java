@@ -114,7 +114,7 @@ public class PhilBot extends AbilityBot {
         } else {
             if (message.hasPhoto()) {
                 final Random random = new Random();
-                if (random.nextInt(100) < 10) {
+                if (random.nextInt(100) < 4) {
                     reply(message.getChatId(), message.getMessageId(), "Это ИИ");
                 }
             }
