@@ -1,6 +1,7 @@
 package com.gundomrays.philebot.telegram.bot;
 
 import com.google.common.base.CharMatcher;
+import com.gundomrays.philebot.ai.ChatGptClient;
 import com.gundomrays.philebot.telegram.bot.transform.MessageTransformer;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
@@ -9,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.api.objects.stickers.Sticker;
 
+import java.io.InputStream;
+import java.net.URLConnection;
 import java.text.Normalizer;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -69,8 +72,11 @@ public class ReactionService {
 
     private final MessageTransformer cyrillicLowerCaseTransformer;
 
-    public ReactionService(MessageTransformer cyrillicLowerCaseTransformer) {
+    private final ChatGptClient chatGptClient;
+
+    public ReactionService(MessageTransformer cyrillicLowerCaseTransformer, ChatGptClient chatGptClient) {
         this.cyrillicLowerCaseTransformer = cyrillicLowerCaseTransformer;
+        this.chatGptClient = chatGptClient;
     }
 
     @PostConstruct
@@ -85,6 +91,15 @@ public class ReactionService {
             return checkSticker(message.getSticker());
         }
         return needsClownReaction(message.getText());
+    }
+
+    public boolean needsClownReaction(final String filePath, final InputStream fileAsStream) {
+        String mimeType = URLConnection.guessContentTypeFromName(filePath);
+        if (mimeType == null) {
+            mimeType = "image/jpeg";
+        }
+        String text = chatGptClient.extractTextFromImage(fileAsStream, mimeType);
+        return needsClownReaction(text);
     }
 
     public boolean needsClownReaction(final String messageText) {
