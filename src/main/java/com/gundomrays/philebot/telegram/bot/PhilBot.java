@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.telegram.telegrambots.abilitybots.api.bot.AbilityBot;
+import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember;
 import org.telegram.telegrambots.meta.api.methods.reactions.SetMessageReaction;
@@ -20,9 +21,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendAnimation;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
-import org.telegram.telegrambots.meta.api.objects.InputFile;
-import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.User;
+import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
 import org.telegram.telegrambots.meta.api.objects.games.Animation;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
@@ -33,10 +32,12 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -217,7 +218,35 @@ public class PhilBot extends AbilityBot {
         if (message == null) {
             return;
         }
-        if (reactionService.needsClownReaction(message)) {
+        boolean needsClownReaction = message.hasText() && reactionService.needsClownReaction(message);
+        if (!needsClownReaction && message.hasPhoto()) {
+            if (message.hasPhoto()) {
+                List<PhotoSize> msgImages = message.getPhoto();
+                InputStream fileAsStream = null;
+                for (PhotoSize photo : msgImages) {
+                    try {
+                        final File file = telegramClient.downloadFile(telegramClient.execute(new GetFile(photo.getFileId())));
+                        fileAsStream = new FileInputStream(file);
+                        needsClownReaction = reactionService.needsClownReaction(file.getName(), fileAsStream);
+                        if (needsClownReaction) {
+                            break;
+                        }
+                    } catch (IOException | TelegramApiException e) {
+                        throw new TelegramException(e.getMessage(), e);
+                    } finally {
+                        //shitty old school way
+                        if (fileAsStream != null) {
+                            try {
+                                fileAsStream.close();
+                            } catch (IOException e) {
+                                log.error(e.getMessage(), e);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (needsClownReaction) {
             ReactionType reactionEmoji = ReactionTypeEmoji.builder()
                     .type(ReactionTypeEmoji.EMOJI_TYPE)
                     .emoji(reactionService.clown())

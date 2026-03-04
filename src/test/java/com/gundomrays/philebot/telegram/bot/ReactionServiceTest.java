@@ -1,5 +1,6 @@
 package com.gundomrays.philebot.telegram.bot;
 
+import com.gundomrays.philebot.ai.ChatGptClient;
 import com.gundomrays.philebot.telegram.bot.transform.MessageTransformer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,13 +21,15 @@ public class ReactionServiceTest {
     @Mock
     private MessageTransformer mockTransformer;
 
+    private ChatGptClient mockChatGptClient;
+
     private ReactionService reactionService;
 
     @BeforeEach
     public void setUp() throws Exception {
         MockitoAnnotations.openMocks(this);
 
-        reactionService = new ReactionService(mockTransformer);
+        reactionService = new ReactionService(mockTransformer, mockChatGptClient);
 
         Set<String> clownTriggerWords = new HashSet<>(Arrays.asList("clownword", "clow0word", "русня"));
 

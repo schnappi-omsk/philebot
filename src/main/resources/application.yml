@@ -17,6 +17,12 @@ server:
   servlet:
     context-path: /
 spring:
+  ai:
+    openai:
+      api-key: ${OPENAI_KEY}
+      chat:
+        options:
+          model: "gpt-4o"
   datasource:
     url: jdbc:postgresql://${PG_HOST}:${PG_PORT}/${PG_DB}
     username: ${PG_USER}
