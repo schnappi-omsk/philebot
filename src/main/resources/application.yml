@@ -4,8 +4,8 @@ xapi:
 tg:
   baseUrl: https://api.telegram.org/bot
   apiToken: ${TGAPI_TOKEN}
-  botName: Phil E-Bot
-  systemCaller: Phil Spencer
+  botName: Asha E-Bot
+  systemCaller: Asha Sharma
   systemArg: Power your dreams
 ebot:
   serviceHost: ${SERVICE_HOST}
