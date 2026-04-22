@@ -74,6 +74,9 @@ public class PhilBot extends AbilityBot {
     @Autowired
     private ReactionService reactionService;
 
+    @Autowired
+    private SocialMediaLinkService socialMediaLinkService;
+
     public PhilBot(TelegramClient telegramClient, String botUsername) {
         super(telegramClient, botUsername);
     }
@@ -113,6 +116,9 @@ public class PhilBot extends AbilityBot {
                 reply(message.getChatId(), message.getMessageId(), "Command not found: " + messageText);
             }
         } else {
+            if (socialMediaLinkService.isSocialMediaLink(messageText)) {
+                reply(message.getChatId(), message.getMessageId(), socialMediaLinkService.mediaLink(messageText));
+            }
             if (message.hasPhoto()) {
                 final Random random = new Random();
                 if (random.nextInt(100) < 4) {
