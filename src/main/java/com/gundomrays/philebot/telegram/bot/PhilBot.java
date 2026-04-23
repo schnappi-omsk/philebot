@@ -5,6 +5,7 @@ import com.gundomrays.philebot.messaging.MessageQueue;
 import com.gundomrays.philebot.telegram.config.SettingsService;
 import com.gundomrays.philebot.telegram.exception.TelegramException;
 import com.gundomrays.philebot.xbox.domain.Profile;
+import io.micrometer.common.util.StringUtils;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,8 +117,11 @@ public class PhilBot extends AbilityBot {
                 reply(message.getChatId(), message.getMessageId(), "Command not found: " + messageText);
             }
         } else {
-            if (socialMediaLinkService.isSocialMediaLink(messageText)) {
-                reply(message.getChatId(), message.getMessageId(), socialMediaLinkService.mediaLink(messageText));
+            if (socialMediaLinkService.isLink(messageText)) {
+                String replyLink = socialMediaLinkService.mediaLink(messageText);
+                if (StringUtils.isNotEmpty(replyLink)) {
+                    reply(message.getChatId(), message.getMessageId(), replyLink);
+                }
             }
             if (message.hasPhoto()) {
                 final Random random = new Random();
