@@ -20,7 +20,22 @@ public class SocialMediaLinkService {
             "tiktok.com", "kktiktok.com"
     );
 
-    public String mediaLink(String url) {
+    public String hasLink(String messageText) {
+        if (StringUtils.isNotEmpty(messageText)) {
+            String[] parts = messageText.split(" ");
+            for (final String part : parts) {
+                if (isValidUrl(part)) {
+                    final String link = mediaLink(part);
+                    if (link != null) {
+                        return link;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private String mediaLink(String url) {
         try {
             URI uri = new URI(url);
             String host = uri.getHost();
@@ -36,10 +51,6 @@ public class SocialMediaLinkService {
             throw new TelegramException(e.getMessage(), e);
         }
         return null;
-    }
-
-    public boolean isLink(String url) {
-        return StringUtils.isNotEmpty(url) && isValidUrl(url);
     }
 
     private boolean isValidUrl(String url) {

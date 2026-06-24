@@ -35,7 +35,7 @@ spring:
       ddl-auto: none
 messages:
   periodical:
-    text: Пацаны, %s прекрасно шарит! Как и все в этом чате!
+    text: Жесть, смотрите, как %s порвался
     probability: 5
   congrats: Разъебывает
   congrats_sticker: CAACAgIAAxkBAAMGZce_ogbN5DbsntxkIyOJ3RTKFZ8AAsEXAAIdTRFKqcvbjvNhzeU0BA
