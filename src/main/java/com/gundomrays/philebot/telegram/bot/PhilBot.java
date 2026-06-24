@@ -117,11 +117,9 @@ public class PhilBot extends AbilityBot {
                 reply(message.getChatId(), message.getMessageId(), "Command not found: " + messageText);
             }
         } else {
-            if (socialMediaLinkService.isLink(messageText)) {
-                String replyLink = socialMediaLinkService.mediaLink(messageText);
-                if (StringUtils.isNotEmpty(replyLink)) {
-                    reply(message.getChatId(), message.getMessageId(), replyLink);
-                }
+            String replyLink = socialMediaLinkService.hasLink(messageText);
+            if (StringUtils.isNotEmpty(replyLink)) {
+                reply(message.getChatId(), message.getMessageId(), replyLink);
             }
             if (message.hasPhoto()) {
                 final Random random = new Random();
