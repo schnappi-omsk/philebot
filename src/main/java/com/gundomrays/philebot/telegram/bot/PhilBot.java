@@ -26,6 +26,7 @@ import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
 import org.telegram.telegrambots.meta.api.objects.games.Animation;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
+import org.telegram.telegrambots.meta.api.objects.photo.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.reactions.ReactionType;
 import org.telegram.telegrambots.meta.api.objects.reactions.ReactionTypeEmoji;
 import org.telegram.telegrambots.meta.api.objects.stickers.Sticker;
@@ -140,6 +141,9 @@ public class PhilBot extends AbilityBot {
                 Animation gif = message.getAnimation();
                 log.info("GIF by {}, id: {}, unique id: {}", from.getUserName(), gif.getFileId(), gif.getFileUniqueId());
             }
+            if (isArticle(message)) {
+                log.info("Article by {}, blocks: {}", from.getUserName(), message.getRichMessage().getBlocks().size());
+            }
             react(message);
             if (message.hasVoice()) {
                 reply(message.getChatId(),
@@ -226,7 +230,7 @@ public class PhilBot extends AbilityBot {
         if (message == null) {
             return;
         }
-        boolean needsClownReaction = message.hasText() && reactionService.needsClownReaction(message);
+        boolean needsClownReaction = (message.hasText() || isArticle(message)) && reactionService.needsClownReaction(message);
         if (!needsClownReaction && message.hasPhoto()) {
             if (message.hasPhoto()) {
                 List<PhotoSize> msgImages = message.getPhoto();
@@ -256,7 +260,6 @@ public class PhilBot extends AbilityBot {
         }
         if (needsClownReaction) {
             ReactionType reactionEmoji = ReactionTypeEmoji.builder()
-                    .type(ReactionTypeEmoji.EMOJI_TYPE)
                     .emoji(reactionService.clown())
                     .build();
             SetMessageReaction reaction = SetMessageReaction.builder()
@@ -370,6 +373,10 @@ public class PhilBot extends AbilityBot {
             final Long chatId = message.getChatId();
             this.chatId = settingsService.chatId(String.valueOf(chatId));
         }
+    }
+
+    private boolean isArticle(final Message message) {
+        return message.getRichMessage() != null;
     }
 
     private boolean isTextResponse(final CommandResponse response) {
