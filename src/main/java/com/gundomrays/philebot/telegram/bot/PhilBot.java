@@ -90,7 +90,14 @@ public class PhilBot extends AbilityBot {
 
     @Override
     public void consume(Update update) {
-        Message message = update.hasEditedMessage() ? update.getEditedMessage() : update.getMessage();
+        if (update.hasEditedMessage()) {
+            consumeEditedMessage(update.getEditedMessage());
+            return;
+        }
+        Message message = update.getMessage();
+        if (message == null) {
+            return;
+        }
         User from = message.getFrom();
         String messageText = message.getText();
 
@@ -226,6 +233,22 @@ public class PhilBot extends AbilityBot {
         }
     }
 
+    // Telegram may send an edited message without a real edit (e.g. after a reaction),
+    // so only the idempotent clown reaction is applied here, without replies, commands or OCR
+    private void consumeEditedMessage(final Message message) {
+        if (message == null) {
+            return;
+        }
+        log.info("Edited message {} from {}, edit date: {}, in the chat: {}",
+                message.getMessageId(),
+                message.getFrom() != null ? message.getFrom().getUserName() : null,
+                message.getEditDate(),
+                message.getChatId());
+        if ((message.hasText() || isArticle(message)) && reactionService.needsClownReaction(message)) {
+            setClownReaction(message);
+        }
+    }
+
     public void react(final Message message) {
         if (message == null) {
             return;
@@ -259,19 +282,7 @@ public class PhilBot extends AbilityBot {
             }
         }
         if (needsClownReaction) {
-            ReactionType reactionEmoji = ReactionTypeEmoji.builder()
-                    .emoji(reactionService.clown())
-                    .build();
-            SetMessageReaction reaction = SetMessageReaction.builder()
-                    .chatId(chatId)
-                    .messageId(message.getMessageId())
-                    .reactionTypes(List.of(reactionEmoji))
-                    .build();
-            try {
-                telegramClient.execute(reaction);
-            } catch (TelegramApiException e) {
-                throw new TelegramException(e.getMessage(), e);
-            }
+            setClownReaction(message);
         }
         if (reactionService.needsManReaction(message)) {
             sendSticker(chatId, reactionService.manSticker(), reactionService.man(), message.getMessageId());
@@ -372,6 +383,22 @@ public class PhilBot extends AbilityBot {
         if (chatId == null || chatId == 0) {
             final Long chatId = message.getChatId();
             this.chatId = settingsService.chatId(String.valueOf(chatId));
+        }
+    }
+
+    private void setClownReaction(final Message message) {
+        ReactionType reactionEmoji = ReactionTypeEmoji.builder()
+                .emoji(reactionService.clown())
+                .build();
+        SetMessageReaction reaction = SetMessageReaction.builder()
+                .chatId(chatId)
+                .messageId(message.getMessageId())
+                .reactionTypes(List.of(reactionEmoji))
+                .build();
+        try {
+            telegramClient.execute(reaction);
+        } catch (TelegramApiException e) {
+            throw new TelegramException(e.getMessage(), e);
         }
     }
 
