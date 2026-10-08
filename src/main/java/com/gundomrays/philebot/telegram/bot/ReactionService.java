@@ -8,6 +8,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
+import org.telegram.telegrambots.meta.api.objects.richblock.*;
+import org.telegram.telegrambots.meta.api.objects.richtext.*;
 import org.telegram.telegrambots.meta.api.objects.stickers.Sticker;
 
 import java.io.InputStream;
@@ -90,7 +92,14 @@ public class ReactionService {
         if (message.hasSticker()) {
             return checkSticker(message.getSticker());
         }
+        if (message.getRichMessage() != null) {
+            return needsClownReaction(message.getRichMessage());
+        }
         return needsClownReaction(message.getText());
+    }
+
+    public boolean needsClownReaction(final RichMessage article) {
+        return needsClownReaction(articleText(article));
     }
 
     public boolean needsClownReaction(final String filePath, final InputStream fileAsStream) {
@@ -162,6 +171,99 @@ public class ReactionService {
     private boolean checkSticker(final Sticker sticker) {
         final String id = sticker.getFileUniqueId();
         return clownSticker.equals(id);
+    }
+
+    private String articleText(final RichMessage article) {
+        return article == null ? "" : blocksText(article.getBlocks());
+    }
+
+    private String blocksText(final List<RichBlock> blocks) {
+        if (blocks == null) {
+            return "";
+        }
+        return joinTexts(blocks.stream().map(this::blockText).toList());
+    }
+
+    private String blockText(final RichBlock block) {
+        return switch (block) {
+            case RichBlockParagraph b -> richText(b.getText());
+            case RichBlockSectionHeading b -> richText(b.getText());
+            case RichBlockPreformatted b -> richText(b.getText());
+            case RichBlockFooter b -> richText(b.getText());
+            case RichBlockThinking b -> richText(b.getText());
+            case RichBlockMathematicalExpression b -> StringUtils.defaultString(b.getExpression());
+            case RichBlockPullQuotation b -> joinTexts(List.of(richText(b.getText()), richText(b.getCredit())));
+            case RichBlockBlockQuotation b -> joinTexts(List.of(blocksText(b.getBlocks()), richText(b.getCredit())));
+            case RichBlockDetails b -> joinTexts(List.of(richText(b.getSummary()), blocksText(b.getBlocks())));
+            case RichBlockList b -> b.getItems() == null ? "" : joinTexts(b.getItems().stream()
+                    .map(item -> item == null ? "" : blocksText(item.getBlocks()))
+                    .toList());
+            case RichBlockTable b -> joinTexts(List.of(tableText(b.getCells()), richText(b.getCaption())));
+            case RichBlockCollage b -> joinTexts(List.of(blocksText(b.getBlocks()), captionText(b.getCaption())));
+            case RichBlockSlideshow b -> joinTexts(List.of(blocksText(b.getBlocks()), captionText(b.getCaption())));
+            case RichBlockPhoto b -> captionText(b.getCaption());
+            case RichBlockVideo b -> captionText(b.getCaption());
+            case RichBlockAnimation b -> captionText(b.getCaption());
+            case RichBlockAudio b -> captionText(b.getCaption());
+            case RichBlockVoiceNote b -> captionText(b.getCaption());
+            case RichBlockMap b -> captionText(b.getCaption());
+            case null, default -> "";
+        };
+    }
+
+    private String tableText(final List<List<RichBlockTableCell>> cells) {
+        if (cells == null) {
+            return "";
+        }
+        return joinTexts(cells.stream()
+                .filter(Objects::nonNull)
+                .flatMap(List::stream)
+                .map(cell -> cell == null ? "" : richText(cell.getText()))
+                .toList());
+    }
+
+    private String captionText(final RichBlockCaption caption) {
+        return caption == null ? "" : joinTexts(List.of(richText(caption.getText()), richText(caption.getCredit())));
+    }
+
+    private String richText(final RichText text) {
+        return switch (text) {
+            case RichTextPlain t -> StringUtils.defaultString(t.getText());
+            case RichTextConcat t -> t.getTexts() == null ? "" : t.getTexts().stream()
+                    .map(this::richText)
+                    .collect(Collectors.joining());
+            case RichTextCustomEmoji t -> StringUtils.defaultString(t.getAlternativeText());
+            case RichTextMathematicalExpression t -> StringUtils.defaultString(t.getExpression());
+            case RichTextBold t -> richText(t.getText());
+            case RichTextItalic t -> richText(t.getText());
+            case RichTextUnderline t -> richText(t.getText());
+            case RichTextStrikethrough t -> richText(t.getText());
+            case RichTextSpoiler t -> richText(t.getText());
+            case RichTextCode t -> richText(t.getText());
+            case RichTextMarked t -> richText(t.getText());
+            case RichTextSubscript t -> richText(t.getText());
+            case RichTextSuperscript t -> richText(t.getText());
+            case RichTextUrl t -> richText(t.getText());
+            case RichTextAnchorLink t -> richText(t.getText());
+            case RichTextReference t -> richText(t.getText());
+            case RichTextReferenceLink t -> richText(t.getText());
+            case RichTextMention t -> richText(t.getText());
+            case RichTextTextMention t -> richText(t.getText());
+            case RichTextHashtag t -> richText(t.getText());
+            case RichTextCashtag t -> richText(t.getText());
+            case RichTextBotCommand t -> richText(t.getText());
+            case RichTextEmailAddress t -> richText(t.getText());
+            case RichTextPhoneNumber t -> richText(t.getText());
+            case RichTextBankCardNumber t -> richText(t.getText());
+            case RichTextDateTime t -> richText(t.getText());
+            case null, default -> "";
+        };
+    }
+
+    private String joinTexts(final List<String> texts) {
+        return texts.stream()
+                .filter(StringUtils::isNotBlank)
+                .collect(Collectors.joining(" "));
     }
 
     private List<String> words(final String text) {
