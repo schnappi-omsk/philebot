@@ -26,6 +26,7 @@ import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
 import org.telegram.telegrambots.meta.api.objects.games.Animation;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
+import org.telegram.telegrambots.meta.api.objects.photo.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.reactions.ReactionType;
 import org.telegram.telegrambots.meta.api.objects.reactions.ReactionTypeEmoji;
 import org.telegram.telegrambots.meta.api.objects.stickers.Sticker;
@@ -89,7 +90,14 @@ public class PhilBot extends AbilityBot {
 
     @Override
     public void consume(Update update) {
-        Message message = update.hasEditedMessage() ? update.getEditedMessage() : update.getMessage();
+        if (update.hasEditedMessage()) {
+            consumeEditedMessage(update.getEditedMessage());
+            return;
+        }
+        Message message = update.getMessage();
+        if (message == null) {
+            return;
+        }
         User from = message.getFrom();
         String messageText = message.getText();
 
@@ -139,6 +147,9 @@ public class PhilBot extends AbilityBot {
             if (message.hasAnimation()) {
                 Animation gif = message.getAnimation();
                 log.info("GIF by {}, id: {}, unique id: {}", from.getUserName(), gif.getFileId(), gif.getFileUniqueId());
+            }
+            if (isArticle(message)) {
+                log.info("Article by {}, blocks: {}", from.getUserName(), message.getRichMessage().getBlocks().size());
             }
             react(message);
             if (message.hasVoice()) {
@@ -222,11 +233,27 @@ public class PhilBot extends AbilityBot {
         }
     }
 
+    // Telegram may send an edited message without a real edit (e.g. after a reaction),
+    // so only the idempotent clown reaction is applied here, without replies, commands or OCR
+    private void consumeEditedMessage(final Message message) {
+        if (message == null) {
+            return;
+        }
+        log.info("Edited message {} from {}, edit date: {}, in the chat: {}",
+                message.getMessageId(),
+                message.getFrom() != null ? message.getFrom().getUserName() : null,
+                message.getEditDate(),
+                message.getChatId());
+        if ((message.hasText() || isArticle(message)) && reactionService.needsClownReaction(message)) {
+            setClownReaction(message);
+        }
+    }
+
     public void react(final Message message) {
         if (message == null) {
             return;
         }
-        boolean needsClownReaction = message.hasText() && reactionService.needsClownReaction(message);
+        boolean needsClownReaction = (message.hasText() || isArticle(message)) && reactionService.needsClownReaction(message);
         if (!needsClownReaction && message.hasPhoto()) {
             if (message.hasPhoto()) {
                 List<PhotoSize> msgImages = message.getPhoto();
@@ -255,20 +282,7 @@ public class PhilBot extends AbilityBot {
             }
         }
         if (needsClownReaction) {
-            ReactionType reactionEmoji = ReactionTypeEmoji.builder()
-                    .type(ReactionTypeEmoji.EMOJI_TYPE)
-                    .emoji(reactionService.clown())
-                    .build();
-            SetMessageReaction reaction = SetMessageReaction.builder()
-                    .chatId(chatId)
-                    .messageId(message.getMessageId())
-                    .reactionTypes(List.of(reactionEmoji))
-                    .build();
-            try {
-                telegramClient.execute(reaction);
-            } catch (TelegramApiException e) {
-                throw new TelegramException(e.getMessage(), e);
-            }
+            setClownReaction(message);
         }
         if (reactionService.needsManReaction(message)) {
             sendSticker(chatId, reactionService.manSticker(), reactionService.man(), message.getMessageId());
@@ -370,6 +384,26 @@ public class PhilBot extends AbilityBot {
             final Long chatId = message.getChatId();
             this.chatId = settingsService.chatId(String.valueOf(chatId));
         }
+    }
+
+    private void setClownReaction(final Message message) {
+        ReactionType reactionEmoji = ReactionTypeEmoji.builder()
+                .emoji(reactionService.clown())
+                .build();
+        SetMessageReaction reaction = SetMessageReaction.builder()
+                .chatId(chatId)
+                .messageId(message.getMessageId())
+                .reactionTypes(List.of(reactionEmoji))
+                .build();
+        try {
+            telegramClient.execute(reaction);
+        } catch (TelegramApiException e) {
+            throw new TelegramException(e.getMessage(), e);
+        }
+    }
+
+    private boolean isArticle(final Message message) {
+        return message.getRichMessage() != null;
     }
 
     private boolean isTextResponse(final CommandResponse response) {
