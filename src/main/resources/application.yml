@@ -13,6 +13,25 @@ ebot:
   requestsPerMin: 10.0
 clown:
   csvUrl: https://wokedetector.cirnoslab.me/data.csv
+psn:
+  # NPSSO cookie of the bot PSN account, see CLAUDE.md. Never commit a real value.
+  npsso: ${PSN_NPSSO:}
+  # PlayStation App OAuth client id used by the community PSN libraries
+  clientId: ${PSN_CLIENT_ID:}
+  # Base64 of "clientId:clientSecret", sent as a Basic authorization header
+  clientBasicAuth: ${PSN_CLIENT_BASIC_AUTH:}
+  redirectUri: com.scee.psxandroid.scecompcall://redirect
+  scope: psn:mobile.v2.core psn:clientapp
+  authUrl: https://ca.account.sony.com/api/authz/v3/oauth
+  apiUrl: https://m.np.playstation.com/api
+  legacyProfileUrl: https://us-prof.np.community.playstation.net/userProfile/v1/users
+  userAgent: Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Mobile Safari/537.36
+  language: en-US
+  requestsPerMin: 20.0
+  titlesLimit: 50
+  limitPerUser: 5
+  minTrophyType: bronze
+  refreshWarningDays: 7
 server:
   servlet:
     context-path: /
@@ -44,6 +63,9 @@ messages:
   scream_sets: adVanced2,adVanced
   deactivate: Пиздец, %s ливнул из чата, нахуя нам его ачивки? Выключим пока...
   activate: С возвращением, %s! Включил вывод твоих ачивок, с тебя $20.
+  psn:
+    tokenExpiring: "PSN: авторизация бота истекает %s. Обновите PSN_NPSSO и перезапустите бота."
+    authFailed: "PSN: авторизация не удалась, трофеи не отслеживаются. Обновите PSN_NPSSO и перезапустите бота."
   react:
     clown:
       emoji: 🤡

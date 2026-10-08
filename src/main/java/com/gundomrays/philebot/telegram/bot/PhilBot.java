@@ -2,6 +2,7 @@ package com.gundomrays.philebot.telegram.bot;
 
 import com.gundomrays.philebot.command.*;
 import com.gundomrays.philebot.messaging.MessageQueue;
+import com.gundomrays.philebot.psn.domain.PsnProfile;
 import com.gundomrays.philebot.telegram.config.SettingsService;
 import com.gundomrays.philebot.telegram.exception.TelegramException;
 import com.gundomrays.philebot.xbox.domain.Profile;
@@ -41,7 +42,9 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class PhilBot extends AbilityBot {
 
@@ -207,6 +210,23 @@ public class PhilBot extends AbilityBot {
             } else if (!user.isActive() && presentsInChat(user.getTgId(), chatId)) {
                 userActivityService.activateUser(user);
                 sendMessage(chatId, userActivityService.activationMessage(user));
+            }
+        }
+
+        // Users with an Xbox profile have already been notified above
+        final Set<Long> xboxUsers = registeredUsers.stream().map(Profile::getTgId).collect(Collectors.toSet());
+        for (PsnProfile user : userActivityService.registeredPsnUsers()) {
+            final boolean notify = !xboxUsers.contains(user.getTgId());
+            if (user.isActive() && !presentsInChat(user.getTgId(), chatId)) {
+                userActivityService.deactivatePsnUser(user);
+                if (notify) {
+                    sendMessage(chatId, userActivityService.deactivationMessage(user));
+                }
+            } else if (!user.isActive() && presentsInChat(user.getTgId(), chatId)) {
+                userActivityService.activatePsnUser(user);
+                if (notify) {
+                    sendMessage(chatId, userActivityService.activationMessage(user));
+                }
             }
         }
     }

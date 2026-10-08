@@ -1,0 +1,35 @@
+{
+  "trophyTitles": [
+    {
+      "npServiceName": "trophy2",
+      "npCommunicationId": "NPWR20188_00",
+      "trophySetVersion": "01.00",
+      "trophyTitleName": "ASTRO's PLAYROOM",
+      "trophyTitleIconUrl": "https://image.example.com/astro.png",
+      "trophyTitlePlatform": "PS5",
+      "hasTrophyGroups": false,
+      "definedTrophies": { "bronze": 37, "silver": 6, "gold": 6, "platinum": 1 },
+      "progress": 12,
+      "earnedTrophies": { "bronze": 5, "silver": 1, "gold": 0, "platinum": 0 },
+      "hiddenFlag": false,
+      "lastUpdatedDateTime": "2026-10-01T21:58:18Z"
+    },
+    {
+      "npServiceName": "trophy",
+      "npCommunicationId": "NPWR10600_00",
+      "trophySetVersion": "01.01",
+      "trophyTitleName": "Ratchet & Clank",
+      "trophyTitleDetail": "Ratchet & Clank Trophy Set",
+      "trophyTitleIconUrl": "https://image.example.com/ratchet.png",
+      "trophyTitlePlatform": "PS4",
+      "hasTrophyGroups": true,
+      "definedTrophies": { "bronze": 40, "silver": 5, "gold": 2, "platinum": 1 },
+      "progress": 100,
+      "earnedTrophies": { "bronze": 40, "silver": 5, "gold": 2, "platinum": 1 },
+      "hiddenFlag": false,
+      "lastUpdatedDateTime": "2026-09-20T18:05:41Z"
+    }
+  ],
+  "nextOffset": 2,
+  "totalItemCount": 3
+}

@@ -30,6 +30,10 @@ Required environment variables:
 - `SERVICE_HOST`: public base URL of this app; it is embedded in posted achievement links
 - `PG_HOST`, `PG_PORT`, `PG_DB`, `PG_USER`, `PG_PASS`
 
+Optional, for PSN trophies (see "PSN trophy pipeline"); without them PSN polling pauses itself and the rest of the bot works:
+- `PSN_NPSSO`: NPSSO cookie of the bot's PSN account
+- `PSN_CLIENT_ID`, `PSN_CLIENT_BASIC_AUTH`: the PlayStation App OAuth client used by the community PSN libraries (`PSN_CLIENT_BASIC_AUTH` is base64 of `clientId:clientSecret`)
+
 Deployment is Heroku-style: `system.properties` sets the Java runtime, and `Procifile` runs `java -jar build/libs/philebot.jar`. That filename is a typo for `Procfile`, so Heroku-style hosts will not pick it up.
 
 ## Architecture
@@ -46,6 +50,17 @@ Several decoupled `@Scheduled` stages connected by in-memory queues:
 The queues are not persisted, so anything queued is lost on restart.
 
 `XApiClient` uses the reactive `WebClient` defined in `xbox/config/PhilConfig`, but calls `.block()` on every request. On a 401 it retries once with the `fresh-login` query parameter. `PhilConfig` also holds `@EnableScheduling`; `@EnableAsync` is not set anywhere.
+
+### PSN trophy pipeline
+A parallel pipeline in the `psn` package that ends in the same `MessageQueue`. It uses Sony's undocumented PlayStation App endpoints, the same ones as the community libraries PSNAWP and psn-api.
+1. `psn/auth/PsnAuthService` exchanges `psn.npsso` for an authorization code (302 `Location` from `/authorize`), then for access and refresh tokens (`/token`). The refresh token and its expiry are stored in `settings` (keys `PSN_REFRESH_TOKEN`, `PSN_REFRESH_EXPIRES_AT`), so the NPSSO is only needed again when the refresh token expires (about 2 months).
+2. `psn/api/PsnApiClient` calls the trophy endpoints with its own Guava `RateLimiter` (`psn.requestsPerMin`). It gets its `WebClient` from Spring Boot's `WebClient.Builder`, so `PhilConfig`'s `WebClient` bean stays the only one. A 401 is retried once with a new token; 403/404 mean the account is unknown or its trophies are hidden from the bot account.
+3. `psn/PsnTrophyActivityService` (every 5 min) makes one `trophyTitles` call per active `PsnProfile` and compares earned counts with `psn_title_progress`. For changed titles it fetches the earned trophies; new ones are those whose ids are not in `psn_earned_trophy` (or, for titles stored only as a baseline, earned after the stored last update). Names and icons come from the title's trophy list, cached per trophy-set version.
+4. `worker/PhilTrophyRetriever` (every 1 min) formats `PsnTrophyQueue` items as links to `/psn/card` (same `achievement.html` template) and pushes them to `MessageQueue`.
+
+`/psnreg <Online ID>` (`PsnUserRegistrationService`) resolves the account id via the legacy `profile2` endpoint and stores a baseline of all titles, so earlier trophies are never announced. Tracked players must let the bot account see their trophies (privacy "Anyone", or the bot as a friend).
+
+When authentication fails, polling pauses until restart and one message (`messages.psn.authFailed`) is posted; a week before the refresh token expires, `messages.psn.tokenExpiring` is posted. To renew: log into playstation.com with the bot account, open `https://ca.account.sony.com/api/v1/ssocookie`, put the `npsso` value into `PSN_NPSSO` and restart. Generating a new NPSSO may invalidate the previous one.
 
 ### Telegram side
 - **`PhilBot`** is created by `telegram/config/TelegramConfig` as a `@Bean`, not by component scan, and its collaborators are field-`@Autowired`. `PhilEbotApplication` registers it with `TelegramBotsLongPollingApplication` in a `CommandLineRunner`. `consume(Update)` is the single entry point for all incoming messages.
@@ -73,6 +88,7 @@ The queues are not persisted, so anything queued is lost on restart.
 ### Tests
 - Tests are plain JUnit 5 + Mockito unit tests that construct the class under test by hand. There are no `@SpringBootTest` context tests.
 - `src/test/resources/application.yml` points to H2 and dummy tokens.
+- PSN HTTP tests use `psn/StubExchange` (a WebClient `ExchangeFunction` with queued responses) and the made-up fixtures in `src/test/resources/psn`; they never reach Sony.
 - The JSON files in `src/test/resources` are XAPI response fixtures.
 
 ## Local runtime artifacts

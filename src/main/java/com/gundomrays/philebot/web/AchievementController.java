@@ -34,6 +34,27 @@ public class AchievementController {
         return "achievement";
     }
 
+    @RequestMapping(value = "/psn/card", method = RequestMethod.GET)
+    public String trophyPage(
+            @RequestParam("name") String trophy,
+            @RequestParam(value = "desc", defaultValue = "") String description,
+            @RequestParam("type") String type,
+            @RequestParam(value = "rarity", defaultValue = "") String rarity,
+            @RequestParam(value = "img", defaultValue = "") String imgUrl,
+            @RequestParam(value = "seed", defaultValue = "") String seed,
+            Model model
+    ) {
+        final String trophyStats = rarity.isBlank() ? type : String.format("%s, %s%%", type, rarity);
+
+        model.addAttribute("achievement", trophy);
+        model.addAttribute("achievementInfo", description);
+        model.addAttribute("achievementStats", trophyStats);
+        model.addAttribute("imgUrl", imgUrl);
+        model.addAttribute("seed", seed);
+
+        return "achievement";
+    }
+
     @RequestMapping("/")
     public String home() {
         return "index";

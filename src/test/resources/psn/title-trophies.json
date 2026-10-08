@@ -1,0 +1,11 @@
+{
+  "trophySetVersion": "01.00",
+  "hasTrophyGroups": false,
+  "trophies": [
+    { "trophyId": 0, "trophyHidden": false, "trophyType": "platinum", "trophyName": "Play Time's Over", "trophyDetail": "Collect all trophies.", "trophyIconUrl": "https://image.example.com/0.png", "trophyGroupId": "default" },
+    { "trophyId": 1, "trophyHidden": false, "trophyType": "bronze", "trophyName": "First Steps", "trophyDetail": "Finish the tutorial.", "trophyIconUrl": "https://image.example.com/1.png", "trophyGroupId": "default" },
+    { "trophyId": 2, "trophyHidden": true, "trophyType": "gold", "trophyName": "Hidden <Hero>", "trophyDetail": "Find the secret & win.", "trophyIconUrl": "https://image.example.com/2.png", "trophyGroupId": "default" },
+    { "trophyId": 3, "trophyHidden": false, "trophyType": "silver", "trophyName": "Collector", "trophyDetail": "Collect 300 coins.", "trophyIconUrl": "https://image.example.com/3.png", "trophyGroupId": "default" }
+  ],
+  "totalItemCount": 4
+}
