@@ -103,7 +103,10 @@ public class PhilBot extends AbilityBot {
 
         initChatId(message);
 
+        log.info("Entities: {}", message.getEntities());
+
         if (message.isCommand()) {
+            log.info("Message is command: {}", messageText);
             CommandRequest request = parseCommand(message);
             log.info("Command {} was received", request.getCommand());
             PhilCommand command = philCommandService.command(PhilCommandUtils.commandName(request.getCommand()));
@@ -125,6 +128,7 @@ public class PhilBot extends AbilityBot {
                 reply(message.getChatId(), message.getMessageId(), "Command not found: " + messageText);
             }
         } else {
+            log.info("Message is not command: {}", messageText);
             String replyLink = socialMediaLinkService.hasLink(messageText);
             if (StringUtils.isNotEmpty(replyLink)) {
                 reply(message.getChatId(), message.getMessageId(), replyLink);
